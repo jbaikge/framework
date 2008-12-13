@@ -66,6 +66,7 @@ class FMySQLiResult extends mysqli_result implements Iterator {
 	private $currentRow; ///< Holds the current row in the Iterator
 	private $rowNum; ///< Incremented during iteration over the resultset
 	private $fetchFunc; ///< Function to use when returning results
+	public $query; ///< SQL query represented by this result
 	/**
 	 * Causes the Iterator to return an Associative Array for every row
 	 *
@@ -112,7 +113,7 @@ class FMySQLiResult extends mysqli_result implements Iterator {
 	 * @see http://php.net/manual/en/function.key.php
 	 */
 	public function key () {
-		return $this->rowNum;
+		return $this->rowNum++;
 	}
 	/**
 	 * Moves the Iterator forward. This method is called after 
@@ -154,8 +155,15 @@ class FMySQLiResult extends mysqli_result implements Iterator {
 	public function fetch () {
 		is_null($this->rowNum) && $this->rowNum = 0;
 		is_null($this->fetchFunc) && $this->asObject();
-		++$this->rowNum;
 		$fetchFunc =& $this->fetchFunc;
 		return $this->$fetchFunc();
+	}
+	/**
+	 * Returns the query associated with this result. Useful if the query contained a lot of sprintf formatting.
+	 * 
+	 * @return Processed SQL query.
+	 */
+	public function getSQL () {
+		return $this->query;
 	}
 }

@@ -34,7 +34,9 @@ class FMySQLi extends mysqli {
 			/// handling here
 			throw new Exception($this->error);
 		}
-		return new FMySQLiResult($this, $resultmode);
+		$result = new FMySQLiResult($this, $resultmode);
+		$result->query = $query;
+		return $result;
 	}
 	/**
 	 * Prepares a query for execution. Uses the MySQL format for preparing 

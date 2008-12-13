@@ -213,6 +213,35 @@ class FDB {
 		}
 		return self::runQuery('slave', $sql, $args);
 	}
+	/**
+	 * Escapes the arguments for a SQL statement. The SQL may use any of 
+	 * the standard sprintf() formatting escapes. The method call is the 
+	 * same as a call to sprintf() where the format string comes first and 
+	 * all arguments follow as arguments to the method.
+	 *
+	 * @param $sql SQL statement in sprintf format
+	 * @return Escaped SQL statement.
+	 */
+	public static function sql ($sql) {
+		$args = array_slice(func_get_args(), 1);
+		if (count($args) && is_array($args[0])) {
+			$args = $args[0];
+		}
+		foreach ($args as &$arg) {
+			$arg = self::$slave->escape_string($arg);
+		}
+		return vsprintf($sql, $args);
+	}
+	/**
+	 * Performs the SQL query on the appropriate server.
+	 *
+	 * @throws Exception if $server parameter is not 'master' or 'slave'.
+	 * @param $server One of 'master' or 'slave'
+	 * @param $sql SQL statement in sprintf format.
+	 * @param $args Array of arguments corresponding to the sprintf SQL 
+	 * statement.
+	 * @return FMySQLiResult object
+	 */
 	private static function runQuery ($server, $sql, $args) {
 		if ($server == 'slave') {
 			$link =& self::$slave;
@@ -226,6 +255,6 @@ class FDB {
 		if (!$link) {
 			throw new Exception("Cannot find link to database. Are you sure you ran `FDB::connect()'?");
 		}
-		return $link->query(vsprintf($sql, $args));
+		return $link->query(self::sql($sql, $args));
 	}
 }

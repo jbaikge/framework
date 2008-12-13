@@ -9,7 +9,7 @@
  * @version $Id$
  */
 
-class String {
+class FString {
 	/**
 	 * Determine a string's existence within another string. A blank needle 
 	 * will always cause this method to return true.

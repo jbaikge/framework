@@ -4,7 +4,7 @@
  * @date Sun May 18 18:36:32 EDT 2008
  * @version $Id$
  */
-class FXMLDocument {
+class FDOMDocument {
 	private $dom; ///< Internal DOMDocument
 	/**
 	 * Creates a new DOM Document with optional version and encoding.
@@ -45,7 +45,7 @@ class FXMLDocument {
 		if ($content) {
 			$new_node->appendChild($this->dom->createTextNode($content));
 		}
-		return new FXMLNode($new_node);
+		return new FDOMNode($new_node);
 	}
 }
 

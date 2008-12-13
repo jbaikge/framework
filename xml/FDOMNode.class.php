@@ -40,7 +40,7 @@ class FXMLNode {
 		if ($content) {
 			$new_node->appendChild($this->node->ownerDocument->createTextNode($content));
 		}
-		return new FXMLNode($new_node);
+		return new FDOMNode($new_node);
 	}
 	/**
 	 * Appends text to the current node.

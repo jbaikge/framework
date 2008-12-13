@@ -18,19 +18,29 @@
 function __autoload ($class_name) {
 	static $class_list;
 	if (is_null($class_list)) {
-		$GLOBALS['config']['libdir'] = dirname(dirname(__FILE__));
-		$rdi = new RecursiveDirectoryIterator($GLOBALS['config']['libdir']);
-		$fcf = new FrameworkClassFilter($rdi);
-		$rii = new RecursiveIteratorIterator($fcf);
-		foreach ($rii as $filename => $info) {
-			$class_list[str_replace('.class.php', '', basename($filename))] = $filename;
-		}
+		include($_ENV['config']['cache.class_list']);
+	}
+	if (!isset($class_list[$class_name])) {
+		$class_list = generate_class_list();
 	}
 	if (isset($class_list[$class_name])) {
 		require($class_list[$class_name]);
 		return true;
 	}
 	return false;
+}
+function generate_class_list () {
+	$rdi = new RecursiveDirectoryIterator($GLOBALS['config']['libdir']);
+	$fcf = new FrameworkClassFilter($rdi);
+	$rii = new RecursiveIteratorIterator($fcf);
+	foreach ($rii as $filename => $info) {
+		$class_list[str_replace('.class.php', '', basename($filename))] = $filename;
+	}
+	file_put_contents(
+		$_ENV['config']['cache.class_list'], 
+		'<?php $class_list = ' . var_export($class_list, true) . ';'
+	);
+	return $class_list;
 }
 class FrameworkClassFilter extends RecursiveFilterIterator {
 	private static $excluded_dirs = array(

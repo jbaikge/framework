@@ -20,6 +20,11 @@ class FDB {
 	private static $master; ///< Master database connection
 	private static $slave; ///< Slave database connection
 	/**
+	 * Do not allow an instance of this class as it is a static class.
+	 */
+	private function __construct () {
+	}
+	/**
 	 * Turns auto commit on or off. This only acts on the master database 
 	 * since slaves cannot perform queries requiring commits.
 	 *
@@ -102,7 +107,7 @@ class FDB {
 				$config['database.name']
 			);
 			if (!self::$master || mysqli_connect_errno()) {
-				trigger_error("Could not connect to master database:<br>" . mysqli_connect_error(), E_USER_ERROR);
+				throw new Exception("Could not connect to master database:" . NEWLINE . mysqli_connect_error());
 			}
 			self::$master = new FMySQLi(
 				$config['database.slave_host'],
@@ -111,7 +116,7 @@ class FDB {
 				$config['database.name']
 			);
 			if (!self::$slave || mysqli_connect_errno()) {
-				trigger_error("Could not connect to slave database:<br>" . mysqli_connect_error(), E_USER_ERROR);
+				throw new Exception("Could not connect to slave database:" . NEWLINE . mysqli_connect_error());
 			}
 		} else {
 			// Just one database to accept all queries
@@ -122,7 +127,7 @@ class FDB {
 				$config['database.name']
 			);
 			if (!self::$master || mysqli_connect_errno()) {
-				trigger_error("Could not connect to database:<br>" . mysqli_connect_error(), E_USER_ERROR);
+				throw new Exception("Could not connect to database:>" . NEWLINE . mysqli_connect_error());
 			}
 			self::$slave =& self::$master;
 		}
@@ -184,9 +189,7 @@ class FDB {
 		if (count($args) && is_array($args[0])) {
 			$args = $args[0];
 		}
-		$sql = ltrim($sql);
-		$queryType = strtoupper(strtok($sql, " \n\t"));
-		if ($queryType == "SELECT") {
+		if (strtoupper(strtok(ltrim($sql), " \r\n\t")) == 'SELECT') {
 			return self::slave($sql, $args);
 		} else {
 			return self::master($sql, $args);
@@ -201,6 +204,9 @@ class FDB {
 	public static function slave ($sql) {
 		// KLUDGE: Cannot use func_get_args() as an argument to a 
 		// function call.
+		if (strtoupper(strtok(ltrim($sql), " \r\n\t")) != 'SELECT') {
+			throw new Exception("Only SELECT statements may run on the slave.");
+		}
 		$args = array_slice(func_get_args(), 1);
 		if (count($args) && is_array($args[0])) {
 			$args = $args[0];
@@ -215,10 +221,10 @@ class FDB {
 			$link =& self::$master;
 		}
 		else {
-			trigger_error("Invalid server name: `{$server}`", E_USER_ERROR);
+			throw new Exception("Invalid server name: `{$server}'");
 		}
 		if (!$link) {
-			trigger_error("Cannot find link to database. Are you sure you ran <i>FDB::connect()</i>?<br>", E_USER_ERROR);
+			throw new Exception("Cannot find link to database. Are you sure you ran `FDB::connect()'?");
 		}
 		return $link->query(vsprintf($sql, $args));
 	}

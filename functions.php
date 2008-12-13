@@ -18,7 +18,9 @@
 function __autoload ($class_name) {
 	static $class_list;
 	if (is_null($class_list)) {
-		include($_ENV['config']['cache.class_list']);
+		$f = $_ENV['config']['cache.class_list'];
+		file_exists($f) && include($f);
+		unset($f);
 	}
 	if (!isset($class_list[$class_name])) {
 		$class_list = generate_class_list();
@@ -30,7 +32,8 @@ function __autoload ($class_name) {
 	return false;
 }
 function generate_class_list () {
-	$rdi = new RecursiveDirectoryIterator($GLOBALS['config']['libdir']);
+	$class_list = array();
+	$rdi = new RecursiveDirectoryIterator($_ENV['config']['library.dir']);
 	$fcf = new FrameworkClassFilter($rdi);
 	$rii = new RecursiveIteratorIterator($fcf);
 	foreach ($rii as $filename => $info) {

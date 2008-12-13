@@ -26,6 +26,9 @@ define('SITEROOT', $file_path);
 
 unset($include_path, $file_path, $tmp_path); ///< Clean up used variables so they don't show up in userland
 
+///////////////////////////////////////////////////////////////////////////////
+// Default configuration options:
+///////////////////////////////////////////////////////////////////////////////
 $_ENV['config']['cache.dir']             = SITEROOT . DS . 'cache';
 $_ENV['config']['cache.class_list']      = 'private' . DS . 'class_list.php';
 $_ENV['config']['database.auto_connect'] = true;
@@ -41,16 +44,35 @@ $_ENV['config']['database.pass']         = null;
 $_ENV['config']['database.name']         = null;
 $_ENV['config']['library.dir']           = SITEROOT . DS . 'lib';
 
+///////////////////////////////////////////////////////////////////////////////
+// Merge in the configuration options specified in the webroot:
+///////////////////////////////////////////////////////////////////////////////
 if (isset($config) && is_array($config)) {
 	$_ENV['config'] = array_merge($_ENV['config'], $config);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Post-merge processing:
+///////////////////////////////////////////////////////////////////////////////
+$_ENV['config']['cache.class_list']      = $_ENV['config']['cache.dir'] . DS . $_ENV['config']['cache.class_list'];
+
+///////////////////////////////////////////////////////////////////////////////
+// Sanity checks:
+///////////////////////////////////////////////////////////////////////////////
 if (!is_dir($_ENV['config']['cache.dir'])) {
 	throw new Exception('Cache directory [' . $_ENV['config']['cache.dir'] . '] does not exist.');
 }
 if (!is_writeable($_ENV['config']['cache.dir'])) {
 	throw new Exception('Cache directory [' . $_ENV['config']['cache.dir'] . '] is not writeable.');
 }
-if (is_dir($_ENV['config']['cache.dir'] . '/.svn')) {
+if (is_dir($_ENV['config']['cache.dir'] . DS . '.svn')) {
 	throw new Exception('Cache directory [' . $_ENV['config']['cache.dir'] . '] should not be under version control.');
+}
+if (!is_dir($_ENV['config']['cache.dir'] . DS . 'private')) {
+	mkdir($_ENV['config']['cache.dir'] . DS . 'private');
+	chmod($_ENV['config']['cache.dir'] . DS . 'private', 0700);
+	file_put_contents(
+		$_ENV['config']['cache.dir'] . DS . 'private' . DS . '.htaccess',
+		"order deny,allow\ndeny from all"
+	);
 }

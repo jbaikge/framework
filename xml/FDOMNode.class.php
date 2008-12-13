@@ -4,7 +4,7 @@
  * @date Sun May 18 21:03:00 EDT 2008
  * @version $Id$
  */
-class FXMLNode {
+class FDOMNode {
 	private $node; ///< Internal DOMElement
 	/**
 	 * @param $node DOMElement to use as the internal node.

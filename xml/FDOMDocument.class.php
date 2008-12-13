@@ -12,7 +12,7 @@ class FDOMDocument {
 	 * @param $version XML Version
 	 * @param $encoding Document encoding string
 	 */
-	public function __construct ($version = null, $encoding = null) {
+	public function __construct ($version = '1.0', $encoding = 'UTF-8') {
 		$this->dom = new DOMDocument($version, $encoding);
 	}
 	/**

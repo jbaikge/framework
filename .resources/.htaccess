@@ -1,0 +1,5 @@
+<FilesMatch \.[a-zA-Z0-9]+\.php$|\.phpt$>
+	Deny From All
+</FilesMatch>
+Options +MultiViews
+php_value include_path ".:..:../..:../../..:../../../..:../../../../..:../../../../../.."

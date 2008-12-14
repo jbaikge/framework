@@ -17,7 +17,8 @@ require(dirname(__FILE__) . '/functions.php');
 #register_shutdown_function("shutdown_callback");
 
 // Include path and siteroot:
-$include_path = $file_path = dirname(__FILE__);
+$script_path = array_shift(get_included_files());
+$include_path = $file_path = dirname($script_path);
 while (!file_exists($file_path . "/webroot.conf.php") && $file_path != ($tmp_path = dirname($file_path))) {
 	$include_path .= PATH_SEPARATOR . ($file_path = $tmp_path);
 }
@@ -26,8 +27,11 @@ ini_set('include_path', $include_path);
 define('SITEROOT', $file_path);
 
 // Determine webroot:
+if (!isset($_SERVER['PHP_SELF'])) $_SERVER['PHP_SELF'] = $script_path;
+if (!isset($_SERVER['PATH_INFO'])) $_SERVER['PATH_INFO'] = '';
+define('WEBROOT', substr($_SERVER['PHP_SELF'], 0, -strlen(substr($script_path, strlen(SITEROOT)) . $_SERVER['PATH_INFO'])));
 
-unset($include_path, $file_path, $tmp_path); ///< Clean up used variables so they don't show up in userland
+unset($include_path, $file_path, $tmp_path, $script_path); ///< Clean up used variables so they don't show up in userland
 
 ///////////////////////////////////////////////////////////////////////////////
 // Default configuration options:

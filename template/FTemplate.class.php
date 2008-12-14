@@ -109,10 +109,15 @@ class FTemplate {
 	 * @return Processed base template if $return_output is True.
 	 */
 	public function render ($return_output = false) {
+		$contents = $this->fetch($this->baseTemplate);
+		foreach ($_ENV['config']['templates.filters'] as $filterClass) {
+			$filter = new $filterClass();
+			$content = $filter->filter($content);
+		}
 		if ($return_output) {
-			return $this->fetch($this->baseTemplate);
+			return $content;
 		} else {
-			echo $this->fetch($this->baseTemplate);
+			echo $content;
 		}
 	}
 }

@@ -42,7 +42,10 @@ class FTemplate {
 	 * FTemplate::render. The path provided must exist within the 
 	 * include_path
 	 */
-	public function __construct ($base_template_path) {
+	public function __construct ($base_template_path = null) {
+		if (is_null($base_template_path)) {
+			$base_template_path = $_ENV['config']['templates.base_template'];
+		}
 		$this->baseTemplate = $base_template_path;
 		$this->lastTemplatePath = null;
 		$this->templateContents = '';

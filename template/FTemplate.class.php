@@ -43,7 +43,7 @@ class FTemplate {
 	 * include_path
 	 */
 	public function __construct ($base_template_path = null) {
-		if (is_null($base_template_path)) {
+		if ($base_template_path === null) {
 			$base_template_path = $_ENV['config']['templates.base_template'];
 		}
 		$this->baseTemplate = $base_template_path;

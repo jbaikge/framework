@@ -17,7 +17,7 @@
  */
 function __autoload ($class_name) {
 	static $class_list;
-	if (is_null($class_list)) {
+	if ($class_list === null) {
 		$f = $_ENV['config']['cache.class_list'];
 		file_exists($f) && include($f);
 		unset($f);

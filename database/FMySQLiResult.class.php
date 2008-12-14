@@ -143,7 +143,7 @@ class FMySQLiResult extends mysqli_result implements Iterator {
 	 * @return False if there are no more results, true otherwise.
 	 */
 	public function valid () {
-		return !is_null($this->currentRow = $this->fetch());
+		return ($this->currentRow = $this->fetch()) !== null;
 	}
 	/**
 	 * Using the fetching function specified by FMySQLiResult::as*(), grabs
@@ -153,8 +153,8 @@ class FMySQLiResult extends mysqli_result implements Iterator {
 	 * representation of result row.
 	 */
 	public function fetch () {
-		is_null($this->rowNum) && $this->rowNum = 0;
-		is_null($this->fetchFunc) && $this->asObject();
+		($this->rowNum === null) && $this->rowNum = 0;
+		($this->fetchFunc === null) && $this->asObject();
 		$fetchFunc =& $this->fetchFunc;
 		return $this->$fetchFunc();
 	}

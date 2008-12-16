@@ -95,7 +95,8 @@ class FDB {
 	 * @param $config An array with one of the sets of keys described above
 	 * @see http://php.net/manual/function.mysqli-connect.php
 	 */
-	public static function connect ($config) {
+	public static function connect ($config = null) {
+		($config === null) && $config =& $_ENV['config'];
 		if ($config['database.master_host'] && 
 			$config['database.slave_host']) {
 			// We have a Master/Slave configuration. Create a 
@@ -189,7 +190,7 @@ class FDB {
 		if (count($args) && is_array($args[0])) {
 			$args = $args[0];
 		}
-		if (strtoupper(strtok(ltrim($sql), " \r\n\t")) == 'SELECT') {
+		if (FString::startsWith(ltrim($sql), 'SELECT')) {
 			return self::slave($sql, $args);
 		} else {
 			return self::master($sql, $args);

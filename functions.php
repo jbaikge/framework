@@ -66,9 +66,16 @@ class FrameworkClassFilter extends RecursiveFilterIterator {
 
 function e () {
 	$args = func_get_args();
-	echo htmlspecialchars(implode(' ', $args));
+	echo htmlize(implode('', $args));
 }
-
+function htmlize () {
+	$str = '';
+	foreach (func_get_args() as $arg) {
+		$str .= nl2br(htmlspecialchars($arg));
+	}
+	return $str;
+}
+/*
 function framework_error_handler ($errno, $errstr, $errfile, $errline) {
 	global $_ERRORS;
 	static $error_map = array(
@@ -130,12 +137,13 @@ function ob_framework_error_handler ($string, $mode) {
 		return $string;
 	}
 }
-
+ */
 /**
  * Registered as a the shutdown function. Records the execution time of every 
  * script and stores it in /tmp/execution-times/<domain name>. If a script had 
  * URL parameters passed, they are included with the script name.
  */
+/*
 function shutdown_callback () {
 	$execution_time = (microtime(true) - SCRIPT_START) * 1000;
 	$memory_usage = memory_get_usage();
@@ -150,3 +158,4 @@ function shutdown_callback () {
 	}
 	fclose($handle);
 }
+ */

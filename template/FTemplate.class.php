@@ -32,9 +32,7 @@
  * @version $Id$
  */
 class FTemplate {
-	private $baseTemplate; ///< Path to the base template
-	private $lastTemplatePath; ///< Path to last used template
-	private $templateContents; ///< Contents of last used template
+	private static $cachedTemplates; ///< Contents of last used template
 	/**
 	 * Sets up this template
 	 *
@@ -42,24 +40,7 @@ class FTemplate {
 	 * FTemplate::render. The path provided must exist within the 
 	 * include_path
 	 */
-	public function __construct ($base_template_path = null) {
-		if ($base_template_path === null) {
-			$base_template_path = $_ENV['config']['templates.base_template'];
-		}
-		$this->baseTemplate = $base_template_path;
-		$this->lastTemplatePath = null;
-		$this->templateContents = '';
-	}
-	/**
-	 * Returns string representation of this template. This method is never 
-	 * called directly - only when trying to represent this Object as a 
-	 * String.
-	 *
-	 * @see FTemplate::render Called with a True argument
-	 * @return Processed base template
-	 */
-	public function __toString () {
-		return $this->render(true);
+	private function __construct () {
 	}
 	/**
 	 * Returns a processed template as a string. All variables in userland 
@@ -82,21 +63,33 @@ class FTemplate {
 	 * specific to the template where the key is the variable name and the 
 	 * value is the variable value
 	 */
-	public function fetch ($template_path, $variables = null) {
-		if ($template_path != $this->lastTemplatePath) {
-			if (!FFileSystem::fileExists($template_path)) {
-				trigger_error("Could not retrieve template: {$template_path}", E_USER_WARNING);
-				return '';
-			}
-			$this->templateContents = file_get_contents($template_path, FILE_USE_INCLUDE_PATH);
-			$this->lastTemplatePath = $template_path;
+	public static function fetch ($template_path, $variables = null) {
+		if (!FFileSystem::fileExists($template_path)) {
+			trigger_error("Could not retrieve template: {$template_path}", E_USER_WARNING);
+			return '';
 		}
 		if ($variables === null) {
 			$variables =& $GLOBALS;
 		}
 		extract($variables, EXTR_REFS);
 		ob_start();
-		eval('?' . '>' . $this->templateContents);
+		include($template_path);
+		return ob_get_clean();
+	}
+	public static function fetchCached ($template_path, $variables = null) {
+		if (!isset(self::$cachedTemplates[$template_path])) {
+			if (!FFileSystem::fileExists($template_path)) {
+				trigger_error("Could not retrieve template: {$template_path}", E_USER_WARNING);
+				return '';
+			}
+			self::$cachedTemplates[$template_path] = file_get_contents($template_path, FILE_USE_INCLUDE_PATH);
+		}
+		if ($variables === null) {
+			$variables =& $GLOBALS;
+		}
+		extract($variables, EXTR_REFS);
+		ob_start();
+		eval('?' . '>' . self::$cachedTemplates[$template_path]);
 		return ob_get_clean();
 	}
 	/**
@@ -108,8 +101,11 @@ class FTemplate {
 	 * template contents (False)
 	 * @return Processed base template if $return_output is True.
 	 */
-	public function render ($return_output = false) {
-		$content = $this->fetch($this->baseTemplate);
+	public static function render ($base_template_path = null, $return_output = false) {
+		if ($base_template_path === null) {
+			$base_template_path = $_ENV['config']['templates.base_template'];
+		}
+		$content = self::fetch($base_template_path);
 		foreach ($_ENV['config']['templates.filters'] as $filterClass) {
 			$filter = new $filterClass();
 			$content = $filter->filter($content);

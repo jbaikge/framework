@@ -153,10 +153,15 @@ class FMySQLiResult extends mysqli_result implements Iterator {
 	 * representation of result row.
 	 */
 	public function fetch () {
-		($this->rowNum === null) && $this->rowNum = 0;
 		($this->fetchFunc === null) && $this->asObject();
 		$fetchFunc =& $this->fetchFunc;
 		return $this->$fetchFunc();
+	}
+	public function first () {
+		$this->data_seek(0);
+		$result = $this->fetch();
+		$this->data_seek($this->rowNum);
+		return $result;
 	}
 	/**
 	 * Returns the query associated with this result. Useful if the query contained a lot of sprintf formatting.

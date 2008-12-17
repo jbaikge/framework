@@ -64,6 +64,11 @@ class FrameworkClassFilter extends RecursiveFilterIterator {
 	}
 }
 
+function e () {
+	$args = func_get_args();
+	echo htmlspecialchars(implode(' ', $args));
+}
+
 function framework_error_handler ($errno, $errstr, $errfile, $errline) {
 	global $_ERRORS;
 	static $error_map = array(

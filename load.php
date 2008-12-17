@@ -36,8 +36,17 @@ unset($include_path, $file_path, $tmp_path, $script_path); ///< Clean up used va
 ///////////////////////////////////////////////////////////////////////////////
 // Default configuration options:
 ///////////////////////////////////////////////////////////////////////////////
+/**
+ * Cache Directory
+ */
 $_ENV['config']['cache.dir']               = SITEROOT . DS . 'cache';
+/**
+ * Cached Class to File Mapping
+ */
 $_ENV['config']['cache.class_list']        = '.private' . DS . 'class_list.php';
+/**
+ * Automatically connect to database on page load
+ */
 $_ENV['config']['database.auto_connect']   = true;
 $_ENV['config']['database.master_host']    = null;
 $_ENV['config']['database.master_user']    = null;
@@ -49,8 +58,27 @@ $_ENV['config']['database.host']           = null;
 $_ENV['config']['database.user']           = null;
 $_ENV['config']['database.pass']           = null;
 $_ENV['config']['database.name']           = null;
+$_ENV['config']['database.definition']     = null;
+/**
+ * Private directories that should not have access from a web browser
+ */
+$_ENV['config']['directories.private']     = array();
+/**
+ * Public directories that should be writeable by the application
+ */
+$_ENV['config']['directories.writeable']   = array();
+/**
+ * Directory where class definition files are located
+ */
 $_ENV['config']['library.dir']             = SITEROOT . DS . 'lib';
+/**
+ * Base template. Used when nothing is defined for FTemplate::render()
+ */
 $_ENV['config']['templates.base_template'] = 'templates/base.html.php';
+/**
+ * Filters to run before returning content in FTemplate::render(). They are 
+ * run in the same order they are provided in the array.
+ */
 $_ENV['config']['templates.filters']       = array('FWebrootFilter');
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -64,6 +92,10 @@ if (isset($config) && is_array($config)) {
 // Post-merge processing:
 ///////////////////////////////////////////////////////////////////////////////
 $_ENV['config']['cache.class_list']        = $_ENV['config']['cache.dir'] . DS . $_ENV['config']['cache.class_list'];
+
+if ($_ENV['config']['database.auto_connect']) {
+	FDB::connect();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Sanity checks:

@@ -37,7 +37,7 @@ function generate_class_list () {
 	$fcf = new FrameworkClassFilter($rdi);
 	$rii = new RecursiveIteratorIterator($fcf);
 	foreach ($rii as $filename => $info) {
-		$class_list[str_replace('.class.php', '', basename($filename))] = $filename;
+		$class_list[str_replace(array('.class.php', '.interface.php'), '', basename($filename))] = $filename;
 	}
 	file_put_contents(
 		$_ENV['config']['cache.class_list'], 
@@ -56,7 +56,10 @@ class FrameworkClassFilter extends RecursiveFilterIterator {
 		$filename = $file->getFilename();
 		return (
 			$is_file
-			&& strpos($filename, '.class.php') !== false
+			&& (
+				strpos($filename, '.class.php') !== false
+				|| strpos($filename, '.interface.php') !== false
+			)
 		) || (
 			!$is_file
 			&& !isset(self::$excluded_dirs[$filename])

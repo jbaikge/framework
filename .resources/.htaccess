@@ -1,4 +1,4 @@
-<FilesMatch \.[a-zA-Z0-9]+\.php$|\.phpt$>
+<FilesMatch \.[a-zA-Z0-9]+\.php$|\.phpt$|\.sql$>
 	Deny From All
 </FilesMatch>
 Options +MultiViews

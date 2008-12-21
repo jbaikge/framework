@@ -22,7 +22,7 @@ function __autoload ($class_name) {
 		file_exists($f) && include($f);
 		unset($f);
 	}
-	if (!isset($class_list[$class_name])) {
+	if (!isset($class_list[$class_name]) || !file_exists($class_list[$class_name])) {
 		$class_list = generate_class_list();
 	}
 	if (isset($class_list[$class_name])) {

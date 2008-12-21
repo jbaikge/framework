@@ -19,6 +19,7 @@
 class FDB {
 	private static $master; ///< Master database connection
 	private static $slave; ///< Slave database connection
+	private static $noSelectCheck; ///< Skip query check in FDB::slave();
 	/**
 	 * Do not allow an instance of this class as it is a static class.
 	 */
@@ -191,6 +192,7 @@ class FDB {
 			$args = $args[0];
 		}
 		if (FString::startsWith(ltrim($sql), 'SELECT')) {
+			self::$noSelectCheck = true;
 			return self::slave($sql, $args);
 		} else {
 			return self::master($sql, $args);
@@ -205,9 +207,10 @@ class FDB {
 	public static function slave ($sql) {
 		// KLUDGE: Cannot use func_get_args() as an argument to a 
 		// function call.
-		if (!FString::startsWith(ltrim($sql), 'SELECT')) {
+		if (!self::$noSelectCheck && !FString::startsWith(ltrim($sql), 'SELECT')) {
 			throw new Exception("Only SELECT statements may run on the slave.");
 		}
+		self::$noSelectCheck = false;
 		$args = array_slice(func_get_args(), 1);
 		if (count($args) && is_array($args[0])) {
 			$args = $args[0];

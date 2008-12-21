@@ -205,7 +205,7 @@ class FDB {
 	public static function slave ($sql) {
 		// KLUDGE: Cannot use func_get_args() as an argument to a 
 		// function call.
-		if (strtoupper(strtok(ltrim($sql), " \r\n\t")) != 'SELECT') {
+		if (!FString::startsWith(ltrim($sql), 'SELECT')) {
 			throw new Exception("Only SELECT statements may run on the slave.");
 		}
 		$args = array_slice(func_get_args(), 1);

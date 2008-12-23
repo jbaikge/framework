@@ -62,7 +62,7 @@
  * @version $Id$
  * @see http://php.net/manual/en/ref.mysqli.php
  */
-class FMySQLiResult extends mysqli_result implements Iterator {
+class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator {
 	private $currentRow; ///< Holds the current row in the Iterator
 	private $rowNum; ///< Incremented during iteration over the resultset
 	private $fetchFunc; ///< Function to use when returning results
@@ -95,6 +95,14 @@ class FMySQLiResult extends mysqli_result implements Iterator {
 		return $this;
 	}
 	/**
+	 * Returns the number of results in the resultset.
+	 *
+	 * @return Number of results in this resultset
+	 */
+	public function count () {
+		return $this->num_rows;
+	}
+	/**
 	 * Returns the current row in the resultset Iterator. This method is 
 	 * not called directly.
 	 *
@@ -113,7 +121,7 @@ class FMySQLiResult extends mysqli_result implements Iterator {
 	 * @see http://php.net/manual/en/function.key.php
 	 */
 	public function key () {
-		return $this->rowNum++;
+		return $this->rowNum;
 	}
 	/**
 	 * Moves the Iterator forward. This method is called after 
@@ -123,7 +131,8 @@ class FMySQLiResult extends mysqli_result implements Iterator {
 	 * @see http://php.net/manual/en/function.next.php
 	 */
 	public function next () {
-		// Next row aquired in valid()
+		$this->currentRow = $this->fetch();
+		++$this->rowNum;
 	}
 	/**
 	 * Places internal Iterator pointer at the beginning of the resultset.
@@ -134,6 +143,7 @@ class FMySQLiResult extends mysqli_result implements Iterator {
 	 */
 	public function rewind () {
 		$this->data_seek($this->rowNum = 0);
+		$this->currentRow = $this->fetch();
 	}
 	/**
 	 * Checks to see if there is another result. This is the "check"
@@ -143,7 +153,20 @@ class FMySQLiResult extends mysqli_result implements Iterator {
 	 * @return False if there are no more results, true otherwise.
 	 */
 	public function valid () {
-		return ($this->currentRow = $this->fetch()) !== null;
+		return $this->rowNum < $this->num_rows;
+	}
+	/**
+	 * Seeks to a specified position.
+	 *
+	 * @param $index position to seek to.
+	 */
+	public function seek ($index) {
+		if ($this->data_seek($index)) {
+			$this->rowNum = $index;
+			$this->currentRow = $this->fetch();
+		} else {
+			throw new OutOfBoundsException('Index '.$index.' is invalid.');
+		}
 	}
 	/**
 	 * Using the fetching function specified by FMySQLiResult::as*(), grabs

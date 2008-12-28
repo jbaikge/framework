@@ -74,7 +74,7 @@ function e () {
 function htmlize () {
 	$str = '';
 	foreach (func_get_args() as $arg) {
-		$str .= nl2br(htmlspecialchars($arg));
+		$str .= nl2br(htmlspecialchars($arg, ENT_COMPAT, 'UTF-8'));
 	}
 	return $str;
 }

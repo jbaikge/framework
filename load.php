@@ -68,6 +68,14 @@ $_ENV['config']['directories.private']     = array();
  */
 $_ENV['config']['directories.writeable']   = array();
 /**
+ * Content type of rendered HTML
+ */
+$_ENV['config']['html.content_type']       = 'UTF-8';
+/**
+ * Determine whether the output will be HTML or XHTML
+ */
+$_ENV['config']['html.xhtml']              = false;
+/**
  * Directory where class definition files are located
  */
 $_ENV['config']['library.dir']             = SITEROOT . DS . 'lib';

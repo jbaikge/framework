@@ -74,7 +74,15 @@ function e () {
 function htmlize () {
 	$str = '';
 	foreach (func_get_args() as $arg) {
-		$str .= nl2br(htmlspecialchars($arg, ENT_COMPAT, 'UTF-8'));
+		$str .= $arg;
+	}
+	$htmlzed = htmlspecialchars($arg, ENT_COMPAT, $_ENV['config']['html.content_type']);
+	if (version_compare(PHP_VERSION,'5.3.0', '>=')) {
+		$str = nl2br($htmlized, $_ENV['config']['html.xhtml']);
+	} else if ($_ENV['config']['html.xhtml'])  {
+		$str = nl2br($htmlized);
+	} else {
+		$str = str_replace('<br />', '<br>', nl2br($htmlized));
 	}
 	return $str;
 }

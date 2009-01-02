@@ -80,6 +80,16 @@ $_ENV['config']['html.xhtml']              = false;
  */
 $_ENV['config']['library.dir']             = SITEROOT . DS . 'lib';
 /**
+ * Secret string used to gain access to certain diagnostic tools. If undefined 
+ * in user-defined configuraiton, set to rand() to prevent unwarranted access.
+ */
+$_ENV['config']['secret']                  = rand();
+$_ENV['config']['session.db_host']         =& $_ENV['config']['database.host'];
+$_ENV['config']['session.db_user']         = 'session';
+$_ENV['config']['session.db_pass']         = '2schQhjJP1sBvoZj6WxHlpky';
+$_ENV['config']['session.db_name']         = 'session';
+$_ENV['config']['session.use_db']          = true;
+/**
  * Base template. Used when nothing is defined for FTemplate::render()
  */
 $_ENV['config']['templates.base_template'] = 'templates/base.html.php';
@@ -103,6 +113,13 @@ $_ENV['config']['cache.class_list']        = $_ENV['config']['cache.dir'] . DS .
 
 if ($_ENV['config']['database.auto_connect']) {
 	FDB::connect();
+}
+
+if ($_ENV['config']['session.use_db']) {
+	if ($_ENV['config']['session.db_host'] == '' && $_ENV['config']['database.master_host'] != '') {
+		$_ENV['config']['session.db_host'] = $_ENV['config']['database.master_host'];
+	}
+	new FDBSessionHandler();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -135,6 +135,13 @@ class FDB {
 		}
 	}
 	/**
+	 * Retrieves the inserted ID of the last INSERT query to operate on the master.
+	 * @return ID of last INSERT query.
+	 */
+	public static function insertId () {
+		return self::$master->insert_id;
+	}
+	/**
 	 * Run query on master database.
 	 *
 	 * @param $sql SQL statement in sprintf format

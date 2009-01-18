@@ -18,6 +18,7 @@
  */
 class FDB {
 	private static $master; ///< Master database connection
+	private static $queryCount = 0; ///< Tally of queries run
 	private static $slave; ///< Slave database connection
 	private static $noSelectCheck; ///< Skip query check in FDB::slave();
 	/**
@@ -133,6 +134,14 @@ class FDB {
 			}
 			self::$slave =& self::$master;
 		}
+	}
+	/**
+	 * Retrieves the number of queries run up to this method call.
+	 *
+	 * @return Query count.
+	 */
+	public static function getQueryCount () {
+		return self::$queryCount;
 	}
 	/**
 	 * Retrieves the inserted ID of the last INSERT query to operate on the master.
@@ -266,6 +275,7 @@ class FDB {
 		if (!$link) {
 			throw new Exception("Cannot find link to database. Are you sure you ran `FDB::connect()'?");
 		}
+		++self::$queryCount;
 		return $link->query(self::sql($sql, $args));
 	}
 }

@@ -7,6 +7,7 @@
  * start doing something.
  */
 
+define('START_TIME', microtime(true));
 define('NEWLINE', isset($_ENV['SHELL']) ? "\n" : '<br>');
 define('DS', DIRECTORY_SEPARATOR);
 

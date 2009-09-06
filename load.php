@@ -116,7 +116,7 @@ if ($_ENV['config']['database.auto_connect']) {
 	FDB::connect();
 }
 
-if ($_ENV['config']['session.use_db']) {
+if ($_ENV['config']['database.auto_connect'] && $_ENV['config']['session.use_db']) {
 	if ($_ENV['config']['session.db_host'] == '' && $_ENV['config']['database.master_host'] != '') {
 		$_ENV['config']['session.db_host'] = $_ENV['config']['database.master_host'];
 	}

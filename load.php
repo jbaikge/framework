@@ -86,10 +86,10 @@ $_ENV['config']['library.dir']             = SITEROOT . DS . 'lib';
  */
 $_ENV['config']['secret']                  = rand();
 $_ENV['config']['session.db_host']         =& $_ENV['config']['database.host'];
-$_ENV['config']['session.db_user']         = 'session';
-$_ENV['config']['session.db_pass']         = '2schQhjJP1sBvoZj6WxHlpky';
-$_ENV['config']['session.db_name']         = 'session';
-$_ENV['config']['session.use_db']          = true;
+$_ENV['config']['session.db_user']         = null;
+$_ENV['config']['session.db_pass']         = null;
+$_ENV['config']['session.db_name']         = null;
+$_ENV['config']['session.use_db']          = false;
 /**
  * Base template. Used when nothing is defined for FTemplate::render()
  */
@@ -105,22 +105,6 @@ $_ENV['config']['templates.filters']       = array('FWebrootFilter');
 ///////////////////////////////////////////////////////////////////////////////
 if (isset($config) && is_array($config)) {
 	$_ENV['config'] = array_merge($_ENV['config'], $config);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Post-merge processing:
-///////////////////////////////////////////////////////////////////////////////
-$_ENV['config']['cache.class_list']        = $_ENV['config']['cache.dir'] . DS . $_ENV['config']['cache.class_list'];
-
-if ($_ENV['config']['database.auto_connect']) {
-	FDB::connect();
-}
-
-if ($_ENV['config']['database.auto_connect'] && $_ENV['config']['session.use_db']) {
-	if ($_ENV['config']['session.db_host'] == '' && $_ENV['config']['database.master_host'] != '') {
-		$_ENV['config']['session.db_host'] = $_ENV['config']['database.master_host'];
-	}
-	new FDBSessionHandler();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -142,4 +126,20 @@ if (!is_dir($_ENV['config']['cache.dir'] . DS . '.private')) {
 		$_ENV['config']['cache.dir'] . DS . '.private' . DS . '.htaccess',
 		"order deny,allow\ndeny from all"
 	);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Post-merge processing:
+///////////////////////////////////////////////////////////////////////////////
+$_ENV['config']['cache.class_list']        = $_ENV['config']['cache.dir'] . DS . $_ENV['config']['cache.class_list'];
+
+if ($_ENV['config']['database.auto_connect']) {
+	FDB::connect();
+}
+
+if ($_ENV['config']['database.auto_connect'] && $_ENV['config']['session.use_db']) {
+	if ($_ENV['config']['session.db_host'] == '' && $_ENV['config']['database.master_host'] != '') {
+		$_ENV['config']['session.db_host'] = $_ENV['config']['database.master_host'];
+	}
+	new FDBSessionHandler();
 }

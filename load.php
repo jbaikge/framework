@@ -121,7 +121,7 @@ if (is_dir($_ENV['config']['cache.dir'] . DS . '.svn')) {
 }
 if (!is_dir($_ENV['config']['cache.dir'] . DS . '.private')) {
 	mkdir($_ENV['config']['cache.dir'] . DS . '.private');
-	chmod($_ENV['config']['cache.dir'] . DS . '.private', 0700);
+	chmod($_ENV['config']['cache.dir'] . DS . '.private', 0777);
 	file_put_contents(
 		$_ENV['config']['cache.dir'] . DS . '.private' . DS . '.htaccess',
 		"order deny,allow\ndeny from all"

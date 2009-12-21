@@ -143,3 +143,33 @@ if ($_ENV['config']['database.auto_connect'] && $_ENV['config']['session.use_db'
 	}
 	new FDBSessionHandler();
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Secret Call processing:
+///////////////////////////////////////////////////////////////////////////////
+if ($_GET['UPDATE_DATABASE'] == $_ENV['config']['secret']) {
+	$database_config = FFileSystem::fileExists('database.conf.php');
+	if ($database_config) {
+		header('Content-Type: text/plain');
+		require($database_config);
+		$queries = FDataModel::getQueries();
+		FDB::query("SET FOREIGN_KEY_CHECKS=0");
+		foreach ($queries as $name => $query) {
+			printf("Building `%s` ... ", $name); flush();
+			try {
+				FDB::query($query);
+			} catch (Exception $e) {
+				echo "\n\nException:\n";
+				echo $e->getMessage();
+				echo "\n\nWarnings:\n";
+				foreach (FDB::query("SHOW WARNINGS")->asRow() as $row) {
+					vprintf("%10s %4d %s\n", $row);
+				}
+				exit;
+			}
+			echo "Done\n";
+		}
+		FDB::query("SET FOREIGN_KEY_CHECKS=1");
+		exit;
+	}
+}

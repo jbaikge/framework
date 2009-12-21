@@ -24,7 +24,13 @@
  * @version $Id$
  */
 class FDataModel {
-	protected $models; ///< Collection of FDataModelTable objects
+	protected static $modelTables; ///< Collection of FDataModelTable objects
+
+	/**
+	 * Prevent object instantiation
+	 */
+	private function __construct () {
+	}
 
 	/**
 	 * Initializes database model by converting all table definition arrays 
@@ -32,10 +38,10 @@ class FDataModel {
 	 *
 	 * @param $data_model Array of table models
 	 */
-	public function __construct ($data_model) {
-		$this->models = array();
+	public static function setModel ($data_model) {
+		self::$modelTables = array();
 		foreach ($data_model as $table_name => &$model) {
-			$this->models[$table_name] = new FDataModelTable($table_name, $model);
+			self::$modelTables[$table_name] = new FDataModelTable($table_name, $model);
 		}
 	}
 	/**
@@ -44,9 +50,12 @@ class FDataModel {
 	 *
 	 * @return Array of queries in the form 'table' => "query".
 	 */
-	public function getQueries () {
+	public static function getQueries () {
+		if (!is_array(self::$modelTables)) {
+			return array();
+		}
 		$queries = array();
-		foreach ($this->models as $table_name => &$model) {
+		foreach (self::$modelTables as $table_name => &$model) {
 			$sql = $model->getSQL();
 			if ($sql) $queries[$table_name] = $sql;
 		}

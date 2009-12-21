@@ -43,7 +43,7 @@ function generate_class_list () {
 		$_ENV['config']['cache.class_list'], 
 		'<?php $class_list = ' . var_export($class_list, true) . ';'
 	);
-	chmod($_ENV['config']['cache.class_list'], 0666);
+	@chmod($_ENV['config']['cache.class_list'], 0666);
 	return $class_list;
 }
 class FrameworkClassFilter extends RecursiveFilterIterator {

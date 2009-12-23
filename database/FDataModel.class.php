@@ -25,6 +25,7 @@
  */
 class FDataModel {
 	protected static $modelTables; ///< Collection of FDataModelTable objects
+	protected static $tableQueries; ///< Collection of queries to run after tables are created
 
 	/**
 	 * Prevent object instantiation
@@ -44,6 +45,9 @@ class FDataModel {
 			self::$modelTables[$table_name] = new FDataModelTable($table_name, $model);
 		}
 	}
+	public static function setTableQueries ($table_queries) {
+		self::$tableQueries = $table_queries;
+	}
 	/**
 	 * Gathers all necessary SQL to convert the database from its current 
 	 * state to the state defined by the user's database model.
@@ -57,7 +61,14 @@ class FDataModel {
 		$queries = array();
 		foreach (self::$modelTables as $table_name => &$model) {
 			$sql = $model->getSQL();
-			if ($sql) $queries[$table_name] = $sql;
+			if ($sql) {
+				$queries[$table_name] = $sql;
+				if (array_key_exists($table_name, self::$tableQueries) && strpos($sql, 'CREATE') === 0) {
+					foreach (self::$tableQueries[$table_name] as $index => &$table_query) {
+						$queries[$table_name . '_' . $index] = $table_query;
+					}
+				}
+			}
 		}
 		return $queries;
 	}

@@ -113,6 +113,7 @@ class FTemplate {
 		if ($return_output) {
 			return $content;
 		} else {
+			@header('Content-Length: ' . strlen($content));
 			echo $content;
 		}
 	}

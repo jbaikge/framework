@@ -16,7 +16,7 @@ class FTemplateUtils {
 	public static function checked ($value, $check = null, $return = false) {
 		if (
 			($check === null && $value != '')
-			|| ($check !== null && $value == $check)
+			|| ($check !== null && (string)$value === (string)$check)
 		) {
 			if ($return) return ' checked="checked"'; else echo ' checked="checked"';
 		}

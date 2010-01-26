@@ -109,25 +109,62 @@ class FDataModelTable {
 		return $sql;
 	}
 	public function getAlter () {
-		global $config;
-		$info_sql = sprintf(
+		echo $this->table . " FDataModelTable::getAlter\n";
+		$info_result = FDB::query(
 			"SELECT NULL FROM information_schema.TABLES WHERE TABLE_SCHEMA = '%s' AND TABLE_NAME = '%s'",
-			$config['database.name'],
+			$_ENV['config']['database.name'],
 			$this->table
 		);
-		if (FDB::query($info_sql)->count() == 0) {
+		if ($info_result->count() == 0) {
 			// Table does not exist. No further action required.
 			return false;
 		}
-		$info_sql = sprintf(
-			"SELECT COLUMN_NAME, ORDINAL_POSITION, COLUMN_DEFAULT, IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, NUMERIC_PRECISION, NUMERIC_SCALE, EXTRA FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '%s' AND TABLE_NAME = '%s'",
-			$config['database.name'],
+		$column_result = FDB::query(
+			"SELECT COLUMN_NAME, ORDINAL_POSITION, COLUMN_DEFAULT, IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, NUMERIC_PRECISION, NUMERIC_SCALE, EXTRA
+			FROM information_schema.COLUMNS
+			WHERE TABLE_SCHEMA = '%s' AND TABLE_NAME = '%s'
+			ORDER BY ORDINAL_POSITION",
+			$_ENV['config']['database.name'],
 			$this->table
 		);
-		foreach (FDB::query($info_sql)->asRow() as $row) {
-			list($name, $position, $default, $null, $type, $len, $precision, $scale, $extra) = $row;
-			printf("%3d. %s:\n     %s(%d)\n", $position, $name, $type, $len);
+
+		$live_columns = array();
+		foreach ($column_result as $row) {
+			$live_columns[$row->COLUMN_NAME] = $row;
 		}
+		
+		$statements = array();
+		$previous_field = null;
+		foreach ($this->fields as $field_name => &$field) {
+			// Skip settings fields:
+			if ($field_name[0] == '_') continue;
+			
+			if ($field->prefix) $field_name = $this->fields['_prefix'] . $field_name;
+			printf("Looking at `%s' ", $field_name);
+			if (isset($live_columns[$field_name])) {
+				// Field exists, verify attributes
+				echo 1;
+			} else {
+				// Field does not exist, determine where to add
+				echo 0;
+				$definition = 'test';
+				if ($previous_field) {
+					$position = sprintf('AFTER `%s`', $previous_field);
+				} else {
+					$position = 'FIRST';
+				}
+				// $field_name already has $this->prefix applied
+				$statements[] = sprintf(
+					"ADD COLUMN %s %s",
+					$field->getDefinition($field_name),
+					$position
+				);
+			}
+			$previous_field = $field_name;
+			echo "\n";
+		}
+		//print_r($live_columns);
+		//print_r($this->fields);
 	}
 	public function getSQL () {
 		$sql = $this->getAlter();

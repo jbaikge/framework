@@ -99,17 +99,17 @@ class FDataModelTable {
 				$on_update,
 				$on_delete
 			);
+			$on_update = $on_delete = null;
 		}
-		$sql = sprintf("CREATE TABLE `%s` (%s) ENGINE=%s DEFAULT CHARSET=utf8",
+		$sql = sprintf("CREATE TABLE IF NOT EXISTS `%s` (%s) ENGINE=%s DEFAULT CHARSET=utf8",
 			$this->table,
-			implode(', ', $statements),
+			implode(", \n", $statements),
 			$this->engine
 		);
 
 		return $sql;
 	}
 	public function getAlter () {
-		echo $this->table . " FDataModelTable::getAlter\n";
 		$info_result = FDB::query(
 			"SELECT NULL FROM information_schema.TABLES WHERE TABLE_SCHEMA = '%s' AND TABLE_NAME = '%s'",
 			$_ENV['config']['database.name'],
@@ -140,14 +140,10 @@ class FDataModelTable {
 			if ($field_name[0] == '_') continue;
 			
 			if ($field->prefix) $field_name = $this->fields['_prefix'] . $field_name;
-			printf("Looking at `%s' ", $field_name);
 			if (isset($live_columns[$field_name])) {
 				// Field exists, verify attributes
-				echo 1;
 			} else {
 				// Field does not exist, determine where to add
-				echo 0;
-				$definition = 'test';
 				if ($previous_field) {
 					$position = sprintf('AFTER `%s`', $previous_field);
 				} else {
@@ -161,14 +157,16 @@ class FDataModelTable {
 				);
 			}
 			$previous_field = $field_name;
-			echo "\n";
 		}
-		//print_r($live_columns);
-		//print_r($this->fields);
+		if ($statements) {
+			return sprintf("ALTER TABLE `%s` %s", $this->table, implode(', ', $statements));
+		} else {
+			return false;
+		}
 	}
 	public function getSQL () {
 		$sql = $this->getAlter();
-		if ($sql === false) {
+		if ($sql === false && FDB::query("SHOW TABLES LIKE '%s'", $this->table)->count() == 0) {
 			$sql = $this->getCreate();
 		}
 		return $sql;

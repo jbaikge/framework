@@ -60,10 +60,10 @@ class FCookie {
 	}
 	public static function send () {
 		$data = json_encode(self::$data);
-		setcookie('auth', self::$auth);
-		setcookie('data', $data);
-		setcookie('digest', self::generateDigest());
-		setcookie('expire', self::$expire);
+		setcookie('auth', self::$auth, 0, WEBROOT . '/');
+		setcookie('data', $data, 0, WEBROOT . '/');
+		setcookie('digest', self::generateDigest(), 0, WEBROOT . '/');
+		setcookie('expire', self::$expire, 0, WEBROOT . '/');
 	}
 	private static function generateDigest () {
 		$data = json_encode(self::$data);

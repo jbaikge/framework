@@ -21,7 +21,8 @@ class FDataModelTable {
 			'index' => array(),
 			'primary' => array(),
 			'unique' => array(),
-			'foreign' => array()
+			'foreign' => array(),
+			'fulltext' => array()
 		);
 		foreach ($this->fields as $field_name => &$field) {
 			if ($field instanceof FDataModelField) {
@@ -53,6 +54,15 @@ class FDataModelTable {
 						'delete' => $field->foreignKeyDelete,
 						'update' => $field->foreignKeyUpdate
 					);
+				}
+				// Fulltext Keys
+				if (count($field->fulltext)) {
+					foreach ($field->fulltext as $fulltext) {
+						if ($fulltext === null) {
+							$fulltext = 'ft_' . $this->table;
+						}
+						$this->keys['fulltext'][$fulltext][] = $prefixed_name;
+					}
 				}
 			}
 		}
@@ -100,6 +110,9 @@ class FDataModelTable {
 				$on_delete
 			);
 			$on_update = $on_delete = null;
+		}
+		foreach ($this->keys['fulltext'] as $key_name => $fields) {
+			$statements[] = sprintf("FULLTEXT `%s` (%s)", $key_name, implode(',', $fields));
 		}
 		$sql = sprintf("CREATE TABLE IF NOT EXISTS `%s` (%s) ENGINE=%s DEFAULT CHARSET=utf8",
 			$this->table,

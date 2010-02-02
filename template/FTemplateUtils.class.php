@@ -36,6 +36,7 @@ class FTemplateUtils {
 	}
 	public static function selectOptions ($options, $selected = null, $return = false) {
 		$option_list = '';
+		$selected = (string)$selected;
 		foreach ($options as $key => $value) {
 			$selected_attribute = ($key == $selected) ? ' selected="selected"' : '';
 			$option_list .= sprintf(

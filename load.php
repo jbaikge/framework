@@ -10,6 +10,7 @@
 define('START_TIME', microtime(true));
 define('NEWLINE', isset($_ENV['SHELL']) ? "\n" : '<br>');
 define('DS', DIRECTORY_SEPARATOR);
+setlocale(LC_ALL, array('en_US', 'en_US.UTF-8'));
 
 require(dirname(__FILE__) . '/functions.php');
 #ob_start('ob_framework_error_handler');

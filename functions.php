@@ -68,6 +68,9 @@ class FrameworkClassFilter extends RecursiveFilterIterator {
 	}
 }
 
+function t ($str) {
+	echo str_replace(array('<br>', '<br />'), '', htmlize($str));
+}
 function e () {
 	$args = func_get_args();
 	echo htmlize(implode('', $args));

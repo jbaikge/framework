@@ -10,8 +10,8 @@ class FDataModelTable {
 	public function __construct ($table, $fields) {
 		$this->table = $table;
 		$this->fields = $fields;
-		if ($fields['_prefix']) $this->prefix = $fields['_prefix'];
-		if ($fields['_engine']) $this->engine = $fields['_engine'];
+		if (array_key_exists('_prefix', $fields)) $this->prefix = $fields['_prefix'];
+		if (array_key_exists('_engine', $fields)) $this->engine = $fields['_engine'];
 	}
 	public function setupFields () {
 		if ($this->setupComplete) {

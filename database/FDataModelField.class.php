@@ -24,6 +24,7 @@ class FDataModelField {
 
 	public function &autoIncrement () {
 		$this->autoIncrement = true;
+		return $this;
 	}
 	public function &def ($default) {
 		$this->default = "'{$default}'";

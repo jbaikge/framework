@@ -6,15 +6,15 @@ class FCookie {
 	private static $expire;
 
 	public static function initialize () {
-		self::$auth = $_COOKIE['auth'];
+		isset($_COOKIE['auth']) && self::$auth = $_COOKIE['auth'];
 		self::$autoSend = true;
-		if ($_COOKIE['data']) {
+		if (isset($_COOKIE['data'])) {
 			self::$data = json_decode(stripslashes($_COOKIE['data']));
 		} else {
 			self::$data = new stdClass();
 		}
-		self::$expire = $_COOKIE['expire'];
-		if ($_COOKIE['digest'] != null && $_COOKIE['digest'] != self::generateDigest()) {
+		isset($_COOKIE['expire']) && self::$expire = $_COOKIE['expire'];
+		if (isset($_COOKIE['digest']) && $_COOKIE['digest'] != null && $_COOKIE['digest'] != self::generateDigest()) {
 			throw new CookieException("Invalid Digest");
 		}
 		self::expire('2 weeks');
@@ -50,7 +50,11 @@ class FCookie {
 		return self::$expire;
 	}
 	public static function get ($key) {
-		return self::$data->$key;
+		if (property_exists(self::$data, $key)) {
+			return self::$data->$key;
+		} else {
+			return null;
+		}
 	}
 	public static function set ($key, $value) {
 		self::$data->$key = $value;

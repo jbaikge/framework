@@ -148,7 +148,7 @@ if ($_ENV['config']['database.auto_connect'] && $_ENV['config']['session.use_db'
 ///////////////////////////////////////////////////////////////////////////////
 // Secret Call processing:
 ///////////////////////////////////////////////////////////////////////////////
-if ($_GET['UPDATE_DATABASE'] == $_ENV['config']['secret']) {
+if (isset($_GET['UPDATE_DATABASE']) && $_GET['UPDATE_DATABASE'] == $_ENV['config']['secret']) {
 	$database_config = FFileSystem::fileExists('database.conf.php');
 	if ($database_config) {
 		header('Content-Type: text/plain');

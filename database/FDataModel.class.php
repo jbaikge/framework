@@ -111,6 +111,16 @@ class FDataModel {
 		return $field;
 	}
 	/**
+	 * @c DATE field.
+	 *
+	 * @return FDataModelField Object with properties described above
+	 */
+	public static function date () {
+		$field = new FDataModelField();
+		$field->type = 'DATE';
+		return $field;
+	}
+	/**
 	 * @c DATETIME field.
 	 *
 	 * @return FDataModelField Object with properties described above

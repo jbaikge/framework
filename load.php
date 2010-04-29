@@ -112,11 +112,14 @@ if (isset($config) && is_array($config)) {
 ///////////////////////////////////////////////////////////////////////////////
 // Sanity checks:
 ///////////////////////////////////////////////////////////////////////////////
-if (!is_dir($_ENV['config']['cache.dir'])) {
-	throw new Exception('Cache directory [' . $_ENV['config']['cache.dir'] . '] does not exist.');
-}
-if (!is_writeable($_ENV['config']['cache.dir'])) {
-	throw new Exception('Cache directory [' . $_ENV['config']['cache.dir'] . '] is not writeable.');
+
+foreach (array_merge(array($_ENV['config']['cache.dir']), $_ENV['config']['directories.writeable']) as $dir) {
+	if (!is_dir($dir)) {
+		throw new Exception('Directory [' . $dir . '] does not exist.');
+	}
+	if (!is_writeable($dir)) {
+		throw new Exception('Directory [' . $dir . '] is not writeable.');
+	}
 }
 if (is_dir($_ENV['config']['cache.dir'] . DS . '.svn')) {
 	throw new Exception('Cache directory [' . $_ENV['config']['cache.dir'] . '] should not be under version control.');

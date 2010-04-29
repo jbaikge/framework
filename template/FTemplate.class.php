@@ -91,7 +91,7 @@ class FTemplate {
 		}
 		extract($variables, EXTR_REFS);
 		ob_start();
-		$original_error_reporting = error_reporting(error_reporting() ~ E_NOTICE);
+		$original_error_reporting = error_reporting(error_reporting() & ~E_NOTICE);
 		eval('?' . '>' . self::$cachedTemplates[$template_path]);
 		error_reporting($original_error_reporting);
 		return ob_get_clean();

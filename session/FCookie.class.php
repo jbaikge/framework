@@ -6,14 +6,18 @@ class FCookie {
 	private static $expire;
 
 	public static function initialize () {
-		isset($_COOKIE['auth']) && self::$auth = $_COOKIE['auth'];
+		if (isset($_COOKIE['auth'])) {
+			self::$auth = $_COOKIE['auth'];
+		}
 		self::$autoSend = true;
 		if (isset($_COOKIE['data'])) {
 			self::$data = json_decode(stripslashes($_COOKIE['data']));
 		} else {
 			self::$data = new stdClass();
 		}
-		isset($_COOKIE['expire']) && self::$expire = $_COOKIE['expire'];
+		if (isset($_COOKIE['expire'])) {
+			self::$expire = $_COOKIE['expire'];
+		}
 		if (isset($_COOKIE['digest']) && $_COOKIE['digest'] != null && $_COOKIE['digest'] != self::generateDigest()) {
 			throw new CookieException("Invalid Digest");
 		}

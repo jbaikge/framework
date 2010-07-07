@@ -86,6 +86,7 @@ class FDataModelTable {
 			$statements[] = sprintf("UNIQUE `%s` (%s)", $key_name, implode(', ', $fields));
 		}
 		foreach ($this->keys['foreign'] as $key_name => $fields) {
+			$on_update = $on_delete = null;
 			$local_fields = array();
 			$reference_fields = array();
 			foreach ($fields as $field) {
@@ -109,7 +110,6 @@ class FDataModelTable {
 				$on_update,
 				$on_delete
 			);
-			$on_update = $on_delete = null;
 		}
 		foreach ($this->keys['fulltext'] as $key_name => $fields) {
 			$statements[] = sprintf("FULLTEXT `%s` (%s)", $key_name, implode(',', $fields));

@@ -42,4 +42,11 @@ class FStringCycle {
 			? $this->strings[$this->index]
 			: $this->strings[$this->index = 0];
 	}
+	/**
+	 * Resets the internal pointer for the cycle. Handy if using the 
+	 * same cycle class for multiple instances.
+	 */
+	public function reset () {
+		$this->index = -1;
+	}
 }

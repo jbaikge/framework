@@ -24,8 +24,8 @@
  * @version $Id$
  */
 class FDataModel {
-	protected static $modelTables; ///< Collection of FDataModelTable objects
-	protected static $tableQueries; ///< Collection of queries to run after tables are created
+	protected static $modelTables = array(); ///< Collection of FDataModelTable objects
+	protected static $tableQueries = array(); ///< Collection of queries to run after tables are created
 
 	/**
 	 * Prevent object instantiation

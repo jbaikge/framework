@@ -3,7 +3,7 @@ class FTemplateUtils {
 	public static function checkbox ($label, $name, $repost = null, $value = 1, $id = null, $return = false) {
 		$id = str_replace('_', '-', $name);
 		$html = sprintf(
-			'<label for="%s"><input type="checkbox" id="%s" name="%s" value="%s"%s> %s</label>',
+			'<label for="%s" class="checkbox"><input type="checkbox" id="%s" name="%s" value="%s"%s> %s</label>',
 			$id,
 			$id,
 			$name,
@@ -24,7 +24,7 @@ class FTemplateUtils {
 	public static function radio ($label, $name, $repost = null, $value = 1, $id = null, $return = false) {
 		$id = str_replace(array('_', '[', ']'), array('-', '', ''), $name . '-' . $value);
 		$html = sprintf(
-			'<label for="%s"><input type="radio" id="%s" name="%s" value="%s"%s> %s</label>',
+			'<label for="%s" class="radio"><input type="radio" id="%s" name="%s" value="%s"%s> %s</label>',
 			$id,
 			$id,
 			$name,

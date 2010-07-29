@@ -6,8 +6,12 @@ class FWebrootFilter implements FTemplateRenderFilter {
 			$searches = array();
 			$replacements = array();
 			foreach ($attributes as $attribute) {
+				$searches[] = $attribute . '="' . WEBROOT . '/';
+				$searches[] = $attribute . "='" . WEBROOT . '/';
 				$searches[] = $attribute . '="/';
 				$searches[] = $attribute . "='/";
+				$replacements[] = $attribute . '="/';
+				$replacements[] = $attribute . "='/";
 				$replacements[] = $attribute . '="' . WEBROOT . '/';
 				$replacements[] = $attribute . "='" . WEBROOT . '/';
 			}

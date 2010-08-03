@@ -130,6 +130,15 @@ class FDataModel {
 		$field->type = 'DATETIME';
 		return $field;
 	}
+	
+	public static function double($length = 6, $precision = 2) {
+		$field = new FDataModelField();
+		$field->type = 'DOUBLE';
+		$field->precision = $precision;
+		$field->length = $length;
+		return $field;
+		
+	}
 	/**
 	 * @c INT field.
 	 *

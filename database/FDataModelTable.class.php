@@ -152,7 +152,7 @@ class FDataModelTable {
 			// Skip settings fields:
 			if ($field_name[0] == '_') continue;
 			
-			if ($field->prefix) $field_name = $this->fields['_prefix'] . $field_name;
+			if ($field->prefix) $field_name = $this->prefix . $field_name;
 			if (isset($live_columns[$field_name])) {
 				// Field exists, verify attributes
 			} else {

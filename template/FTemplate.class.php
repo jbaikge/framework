@@ -78,6 +78,25 @@ class FTemplate {
 		error_reporting($original_error_reporting);
 		return ob_get_clean();
 	}
+	/**
+	 * Similar to FTemplate::fetch() with one exception: The raw template
+	 * data is cached internally. Repeated calls use the template data from
+	 * memory instead of repeated filesystem calls.
+	 *
+	 * This method is particularly handy for loops to provide a performance
+	 * increase. 
+	 * 
+	 * Performance tests reveal that single or few calls to this method
+	 * take more time than single or few calls to FTemplate::fetch(), while
+	 * multiple calls to this method smoke the uncached version.
+	 *
+	 * @param $template_path Path to the template. The template must exist 
+	 * within the include_path
+	 * @param $variables @b Optional Associative array of variables 
+	 * specific to the template where the key is the variable name and the 
+	 * value is the variable value
+	 * @see FTemplate::fetch()
+	 */
 	public static function fetchCached ($template_path, $variables = null) {
 		if (!isset(self::$cachedTemplates[$template_path])) {
 			if (!FFileSystem::fileExists($template_path)) {

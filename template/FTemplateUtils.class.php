@@ -1,5 +1,20 @@
 <?php
+/**
+ * Template utilities handy for development of common HTML constructs.
+ *
+ * @author Jacob Tews <jacob@webteks.com>
+ * @date Fri Mar  7 21:36:17 EST 2008
+ * @version $Id$
+ */
 class FTemplateUtils {
+	/**
+	 * Creates an input field with the type checkbox, surrounded by a label with optional text.
+	 * 
+	 * Example Usage:
+	 * 
+	 * Simplest:
+	 * FTemplateUtils::checkbox('My Checkbox', 'checkbox_name', $post['checkbox_name']);
+	 */
 	public static function checkbox ($label, $name, $repost = null, $value = 1, $id = null, $return = false) {
 		$id = str_replace('_', '-', $name);
 		$html = sprintf(

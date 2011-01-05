@@ -47,4 +47,21 @@ class FString {
 			return strncmp($source, $prefix, strlen($prefix)) == 0;
 		}
 	}
+	/**
+	 * Determine whether a string ends with another string.
+	 * @see http://snipplr.com/view/13213/check-if-a-string-ends-with-another-string/
+	 * @param $source The string to check
+	 * @param $suffix The string to check with
+	 * @param $case_insensitive @b Optional True to ignore case, false
+	 * otherwise. (Default: false)
+	 * @return True if @c $source ends with @c $prefix, false otherwise
+	 */
+	public static function endsWith ($source, $suffix, $case_insensitive = false) {
+		$substr = substr($source, strlen($source) - strlen($suffix));
+		if ($case_insensitive) {
+			return strcasecmp($substr, $suffix) == 0;
+		} else {
+			return strcmp($substr, $suffix) == 0;
+		}
+	}
 }

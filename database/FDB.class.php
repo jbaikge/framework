@@ -27,6 +27,18 @@ class FDB {
 	private function __construct () {
 	}
 	/**
+	 * Returns the number of rows affected by the last INSERT, UPDATE,
+	 * REPLACE, or DELETE query.
+	 *
+	 * For SELECT statements, works like FMySQLiResult::count()
+	 *
+	 * @return Number of rows affected by last query
+	 * @see http://php.net/manual/mysqli.affected-rows.php
+	 */
+	public static function affectedRows () {
+		return self::$slave->affected_rows;
+	}
+	/**
 	 * Turns auto commit on or off. This only acts on the master database 
 	 * since slaves cannot perform queries requiring commits.
 	 *

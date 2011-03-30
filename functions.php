@@ -15,7 +15,8 @@
  * exist, __autoload will attempt to search for and load the class 
  * automatically. If it cannot do so, a fatal error is returned.
  */
-function __autoload ($class_name) {
+spl_autoload_register('autoload');
+function autoload ($class_name) {
 	static $class_list;
 	if ($class_list === null) {
 		$f = $_ENV['config']['cache.class_list'];

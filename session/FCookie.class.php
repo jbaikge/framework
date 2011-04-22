@@ -18,7 +18,13 @@ class FCookie {
 		if (isset($_COOKIE['expire'])) {
 			self::$expire = $_COOKIE['expire'];
 		}
+		// Check for invalid digest
 		if (isset($_COOKIE['digest']) && $_COOKIE['digest'] != null && $_COOKIE['digest'] != self::generateDigest()) {
+			throw new CookieException("Invalid Digest");
+		}
+		// Check for missing digest (Only applies if there has been
+		// data, otherwise continue to build new cookie)
+		if (isset($_COOKIE['data']) && !isset($_COOKIE['digest']) || !$_COOKIE['digest']) {
 			throw new CookieException("Invalid Digest");
 		}
 		self::expire('2 weeks');

@@ -34,7 +34,7 @@ function autoload ($class_name) {
 }
 function generate_class_list () {
 	$class_list = array();
-	$rdi = new RecursiveDirectoryIterator($_ENV['config']['library.dir']);
+	$rdi = new RecursiveDirectoryIterator($_ENV['config']['library.dir'], RecursiveDirectoryIterator::FOLLOW_SYMLINKS);
 	$fcf = new FrameworkClassFilter($rdi);
 	$rii = new RecursiveIteratorIterator($fcf);
 	foreach ($rii as $filename => $info) {

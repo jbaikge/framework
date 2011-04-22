@@ -24,7 +24,7 @@ class FCookie {
 		}
 		// Check for missing digest (Only applies if there has been
 		// data, otherwise continue to build new cookie)
-		if (isset($_COOKIE['data']) && !isset($_COOKIE['digest']) || !$_COOKIE['digest']) {
+		if (isset($_COOKIE['data']) && !isset($_COOKIE['digest']) || (isset($_COOKIE['digest']) && !$_COOKIE['digest'])) {
 			throw new CookieException("Invalid Digest");
 		}
 		self::expire('2 weeks');

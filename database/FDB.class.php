@@ -111,8 +111,8 @@ class FDB {
 	 */
 	public static function connect ($config = null) {
 		($config === null) && $config =& $_ENV['config'];
-		if ($config['database.master_host'] && 
-			$config['database.slave_host']) {
+		if (isset($config['database.master_host'], 
+			$config['database.slave_host'])) {
 			// We have a Master/Slave configuration. Create a 
 			// connection to each of the servers.
 			self::$master = new FMySQLi(

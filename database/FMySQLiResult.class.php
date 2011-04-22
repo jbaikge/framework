@@ -77,6 +77,16 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 		return $this;
 	}
 	/**
+	 * Causes the Iterator to return a string with the field data
+	 * as a CSV.
+	 *
+	 * @return Reference back to result
+	 */
+	public function &asCSV () {
+		$this->fetchFunc = 'fetch_csv';
+		return $this;
+	}
+	/**
 	 * Causes the Iterator to return an Object for every row
 	 *
 	 * @return Reference back to result
@@ -180,6 +190,23 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 		$fetchFunc =& $this->fetchFunc;
 		return $this->$fetchFunc();
 	}
+	/**
+	 */
+	public function fetch_csv () {
+		static $csvh;
+		if (!$csvh) {
+			$csvh = fopen('php://memory', 'r+');
+		}
+		if ($row = $this->fetch_row()) {
+			$csv_bytes = fputcsv($csvh, $row);
+			fseek($csvh, 0);
+			$row = fread($csvh, $csv_bytes);
+			ftruncate($csvh, 0);
+		}
+		return $row;
+	}
+	/**
+	 */
 	public function first () {
 		$this->data_seek(0);
 		$result = $this->fetch();
@@ -193,5 +220,22 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	 */
 	public function getSQL () {
 		return $this->query;
+	}
+	/**
+	 */
+	public function headers () {
+		$fields = $this->fetch_fields();
+		$headers = array();
+		foreach ($fields as &$field) {
+			$headers[] = $field->name;
+		}
+		if ($this->fetchFunc == 'fetch_csv') {
+			$csvh = fopen('php://memory', 'r+');
+			$csv_bytes = fputcsv($csvh, $headers);
+			fseek($csvh, 0);
+			$headers = fread($csvh, $csv_bytes);
+			fclose($csvh);
+		}
+		return $headers;
 	}
 }

@@ -85,6 +85,7 @@ function htmlize () {
 	if ($str == '') return '';
 
 	$htmlized = htmlspecialchars($str, ENT_COMPAT, $_ENV['config']['html.content_type'], false);
+	$htmlized = trim($htmlized);
 	if (version_compare(PHP_VERSION,'5.3.0', '>=')) {
 		$str = nl2br($htmlized, $_ENV['config']['html.xhtml']);
 	} else if ($_ENV['config']['html.xhtml'])  {

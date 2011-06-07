@@ -82,6 +82,7 @@ $_ENV['config']['html.xhtml']              = false;
  * Directory where class definition files are located
  */
 $_ENV['config']['library.dir']             = SITEROOT . DS . 'lib';
+$_ENV['config']['library.dir.signals']     = $_ENV['config']['library.dir'] . DS . 'signals';
 /**
  * Secret string used to gain access to certain diagnostic tools. If undefined 
  * in user-defined configuraiton, set to rand() to prevent unwarranted access.

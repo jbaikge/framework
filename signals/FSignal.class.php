@@ -29,8 +29,7 @@ class FSignal {
 
 	private static function load() {
 		foreach (glob($_ENV['config']['library.dir.signals'] . '/*.class.php') as $filename) {
-			$parts = explode('.', $filename);
-			self::register($parts[0]);
+			self::register(basename($filename, '.class.php'));
 		}
 		self::$has_loaded = true;
 	}

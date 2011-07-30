@@ -1,12 +1,12 @@
 <?php
-/**
- * @author <Jacob Tews> jacob@webteks.com
+/*!
+ * @author Jacob Tews <jacob@webteks.com>
  * @date Sun May 18 18:36:32 EDT 2008
  * @version $Id$
  */
 class FDOMDocument {
 	private $dom; ///< Internal DOMDocument
-	/**
+	/*!
 	 * Creates a new DOM Document with optional version and encoding.
 	 *
 	 * @param $version XML Version
@@ -15,7 +15,7 @@ class FDOMDocument {
 	public function __construct ($version = '1.0', $encoding = 'UTF-8') {
 		$this->dom = new DOMDocument($version, $encoding);
 	}
-	/**
+	/*!
 	 * Generates HTML version of Document.
 	 *
 	 * @return String representation of Document in HTML format
@@ -23,7 +23,7 @@ class FDOMDocument {
 	public function asHTML () {
 		return $this->dom->saveHTML();
 	}
-	/**
+	/*!
 	 * Generates XML version of Document.
 	 *
 	 * @return String representation of Document in XML format
@@ -31,7 +31,7 @@ class FDOMDocument {
 	public function asXML () {
 		return $this->dom->saveXML();
 	}
-	/**
+	/*!
 	 * Creates the Root Node of the Document. A properly formatted Document 
 	 * can only have one root node. All other nodes will stem from this 
 	 * node as children.

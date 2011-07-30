@@ -1,5 +1,5 @@
 <?php
-/**
+/*!
  * Overrides the native mysqli_stmt class in PHP. Right now, this is a 
  * placeholder that will contain an implementation of Iterator to handle 
  * resultsets similar to MySQLiResult.

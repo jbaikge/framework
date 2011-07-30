@@ -1,5 +1,5 @@
 <?php
-/**
+/*!
  * Database connection handler. Supports master / slave and single-database 
  * configurations transparently. 
  *
@@ -21,12 +21,12 @@ class FDB {
 	private static $queryCount = 0; ///< Tally of queries run
 	private static $slave; ///< Slave database connection
 	private static $noSelectCheck; ///< Skip query check in FDB::slave();
-	/**
+	/*!
 	 * Do not allow an instance of this class as it is a static class.
 	 */
 	private function __construct () {
 	}
-	/**
+	/*!
 	 * Returns the number of rows affected by the last INSERT, UPDATE,
 	 * REPLACE, or DELETE query.
 	 *
@@ -38,7 +38,7 @@ class FDB {
 	public static function affectedRows () {
 		return self::$slave->affected_rows;
 	}
-	/**
+	/*!
 	 * Turns auto commit on or off. This only acts on the master database 
 	 * since slaves cannot perform queries requiring commits.
 	 *
@@ -53,7 +53,7 @@ class FDB {
 	public static function autocommit ($bool = true) {
 		return self::$master->autocommit($bool);
 	}
-	/**
+	/*!
 	 * Closes the database connection(s). This method is automatically 
 	 * called on script shutdown and should not need to be called under 
 	 * normal coding conditions. Both master and slave connections are 
@@ -67,7 +67,7 @@ class FDB {
 		}
 		self::$master->close();
 	}
-	/**
+	/*!
 	 * Makes changes to database permenant. This method is only useful if 
 	 * FDB::autocommit is called with @c false.
 	 *
@@ -77,7 +77,7 @@ class FDB {
 	public static function commit () {
 		return self::$master->commit();
 	}
-	/**
+	/*!
 	 * Creates connections to database server(s). This method is called 
 	 * before script execution to generate the required connections and 
 	 * should not need to be called under normal coding conditions. The 
@@ -147,7 +147,7 @@ class FDB {
 			self::$slave =& self::$master;
 		}
 	}
-	/**
+	/*!
 	 * Retrieves the number of queries run up to this method call.
 	 *
 	 * @return Query count.
@@ -155,14 +155,14 @@ class FDB {
 	public static function getQueryCount () {
 		return self::$queryCount;
 	}
-	/**
+	/*!
 	 * Retrieves the inserted ID of the last INSERT query to operate on the master.
 	 * @return ID of last INSERT query.
 	 */
 	public static function insertId () {
 		return self::$master->insert_id;
 	}
-	/**
+	/*!
 	 * Run query on master database.
 	 *
 	 * @param $sql SQL statement in sprintf format
@@ -177,7 +177,7 @@ class FDB {
 		}
 		return self::runQuery('master', $sql, $args);
 	}
-	/**
+	/*!
 	 * Auto-negotiates where to run query. The arguments for this method 
 	 * allow great flexibility when writing queries and offer better safety 
 	 * when running queries.
@@ -226,7 +226,7 @@ class FDB {
 			return self::master($sql, $args);
 		}
 	}
-	/**
+	/*!
 	 * Run query on slave database.
 	 *
 	 * @param $sql SQL statement in sprintf format
@@ -245,7 +245,7 @@ class FDB {
 		}
 		return self::runQuery('slave', $sql, $args);
 	}
-	/**
+	/*!
 	 * Escapes the arguments for a SQL statement. The SQL may use any of 
 	 * the standard sprintf() formatting escapes. The method call is the 
 	 * same as a call to sprintf() where the format string comes first and 
@@ -264,7 +264,7 @@ class FDB {
 		}
 		return vsprintf($sql, $args);
 	}
-	/**
+	/*!
 	 * Performs the SQL query on the appropriate server.
 	 *
 	 * @throws Exception if $server parameter is not 'master' or 'slave'.

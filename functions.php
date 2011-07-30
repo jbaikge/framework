@@ -95,31 +95,6 @@ function htmlize () {
 	}
 	return $str;
 }
-function photo_size($photo, $max_width, $max_height, $return_value = "w")
-{
-	$dimensions = @getimagesize($photo);
-	$width = $dimensions[0];
-	$height = $dimensions[1];
-  
-	if($width > $max_width || $height > $max_height)
-  { 
-	  if($width > $max_width)
-	{
-		$height = $height*$max_width/$width;
-		$width = $max_width;
-	  }
-	
-	  if($height > $max_height)
-	{
-		$width = $width*$max_height/$height;
-		$height = $max_height;
-	  }
-	}
-  
-	if($return_value == "w") { $image_dimension = $width; } else { $image_dimension = $height; }
-  
-	return round($image_dimension, 2);
- }
 if (!function_exists('money_format')) {
 	function money_format ($format, $number) {
 		$regex  = '/%((?:[\^!\-]|\+|\(|\=.)*)([0-9]+)?'.
@@ -207,6 +182,59 @@ if (!function_exists('money_format')) {
 		return $format;
 	}
 }
+
+function sync_database ($tables = null, $queries = null) {
+	$noisy = true;
+	if ($tables) {
+		FDataModel::setModel($tables);
+		FDataModel::setTableQueries($queries);
+		$noisy = false;
+	} else {
+		$database_config = FFileSystem::fileExists('database.conf.php');
+		if ($database_config) {
+			require($database_config);
+		} else {
+			exit;
+		}
+	}
+	$noisy && header('Content-Type: text/plain');
+	FDB::query("SET FOREIGN_KEY_CHECKS=0");
+	$queries = FDataModel::getQueries();
+	foreach ($queries as $name => $query) {
+		$noisy && printf("Building `%s` ... ", $name);
+		$noisy && flush();
+		try {
+			FDB::query($query);
+		} catch (Exception $e) {
+			echo "\n\nException:\n";
+			echo $e->getMessage();
+			echo "\n\nWarnings:\n";
+			foreach (FDB::query("SHOW WARNINGS")->asRow() as $row) {
+				vprintf("%10s %4d %s\n", $row);
+			}
+			exit;
+		}
+		$noisy && print("Done\n");
+	}
+	FDB::query("SET FOREIGN_KEY_CHECKS=1");
+	$noisy && exit;
+}
+
+function array_flatten ($array) {
+	$output = array();
+	$stack = array();
+	$stack = array_merge($stack, array_reverse($array));
+	while ($stack) {
+		$top = array_pop($stack);
+		if (is_array($top)) {
+			$stack = array_merge($stack, array_reverse($top));
+		} else {
+			array_push($output, $top);
+		}
+	}
+	return $output;
+}
+
 /*
 function framework_error_handler ($errno, $errstr, $errfile, $errline) {
 	global $_ERRORS;

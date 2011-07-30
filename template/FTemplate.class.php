@@ -1,5 +1,5 @@
 <?php
-/**
+/*!
  * Basic templating engine. The template path provided in the constructor is 
  * the final template included and returned with the call to FTemplate::render.  
  * Any variables declared in userland are available in the templates when 
@@ -33,7 +33,7 @@
  */
 class FTemplate {
 	private static $cachedTemplates; ///< Contents of last used template
-	/**
+	/*!
 	 * Sets up this template
 	 *
 	 * @param $base_template_path The path to the base template used in 
@@ -42,7 +42,7 @@ class FTemplate {
 	 */
 	private function __construct () {
 	}
-	/**
+	/*!
 	 * Returns a processed template as a string. All variables in userland 
 	 * become availabe in the template as references to the real variables.
 	 * Modifications to variables in the template may be reflected in the 
@@ -62,6 +62,7 @@ class FTemplate {
 	 * @param $variables @b Optional Associative array of variables 
 	 * specific to the template where the key is the variable name and the 
 	 * value is the variable value
+	 * @return String contents of rendered template
 	 */
 	public static function fetch ($template_path, $variables = null) {
 		if (!FFileSystem::fileExists($template_path)) {
@@ -78,7 +79,7 @@ class FTemplate {
 		error_reporting($original_error_reporting);
 		return ob_get_clean();
 	}
-	/**
+	/*!
 	 * Similar to FTemplate::fetch() with one exception: The raw template
 	 * data is cached internally. Repeated calls use the template data from
 	 * memory instead of repeated filesystem calls.
@@ -96,6 +97,7 @@ class FTemplate {
 	 * specific to the template where the key is the variable name and the 
 	 * value is the variable value
 	 * @see FTemplate::fetch()
+	 * @return String contents of rendered template
 	 */
 	public static function fetchCached ($template_path, $variables = null) {
 		if (!isset(self::$cachedTemplates[$template_path])) {
@@ -115,11 +117,14 @@ class FTemplate {
 		error_reporting($original_error_reporting);
 		return ob_get_clean();
 	}
-	/**
+	/*!
 	 * Builds the final template. Generally the last method called, the 
 	 * processed contents of the base template (passed during construction) 
 	 * are either echoed (default) or returned as a string.
 	 *
+	 * @param $base_template_path @b Optional. Base template filename. If none 
+	 * provided, the path defined by the @c templates.base_template 
+	 * configuration option in the webroot is used.
 	 * @param $return_output @b Optional Whether to return (True) or echo 
 	 * template contents (False)
 	 * @return Processed base template if $return_output is True.

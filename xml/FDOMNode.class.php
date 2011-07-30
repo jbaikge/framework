@@ -1,18 +1,18 @@
 <?php
-/**
+/*!
  * @author Jacob Tews <jacob@webteks.com>
  * @date Sun May 18 21:03:00 EDT 2008
  * @version $Id$
  */
 class FDOMNode {
 	private $node; ///< Internal DOMElement
-	/**
+	/*!
 	 * @param $node DOMElement to use as the internal node.
 	 */
 	public function __construct (DOMElement &$node) {
 		$this->node = $node;
 	}
-	/**
+	/*!
 	 * Catches calls to methods not explicitly defined in the class. When 
 	 * arbitrary methods are called on this Object, it appends a DOMElement 
 	 * to the internal node of the name specified by the method name. If an 
@@ -28,7 +28,7 @@ class FDOMNode {
 		if (count($args)) $content = $args[0];
 		return $this->appendChild($name, $content);
 	}
-	/**
+	/*!
 	 * Creates a node and appends it as a child to the current node.
 	 *
 	 * @param $name Node name
@@ -42,7 +42,7 @@ class FDOMNode {
 		}
 		return new FDOMNode($new_node);
 	}
-	/**
+	/*!
 	 * Appends text to the current node.
 	 *
 	 * @param $text Text to append to node
@@ -52,7 +52,7 @@ class FDOMNode {
 		$this->node->appendChild($this->node->ownerDocument->createTextNode($text));
 		return $this;
 	}
-	/**
+	/*!
 	 * Sets an attribute on the current node.
 	 *
 	 * @param $name Name of attribute

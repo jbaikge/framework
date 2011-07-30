@@ -1,5 +1,5 @@
 <?php
-/**
+/*!
  * Overrides the native mysqli_result PHP class. An instance of this object is 
  * returned after issuing a FDB::query call.
  *
@@ -67,7 +67,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	private $rowNum; ///< Incremented during iteration over the resultset
 	private $fetchFunc; ///< Function to use when returning results
 	public $query; ///< SQL query represented by this result
-	/**
+	/*!
 	 * Causes the Iterator to return an Associative Array for every row
 	 *
 	 * @return Reference back to result
@@ -76,7 +76,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 		$this->fetchFunc = 'fetch_assoc';
 		return $this;
 	}
-	/**
+	/*!
 	 * Causes the Iterator to return a string with the field data
 	 * as a CSV.
 	 *
@@ -86,7 +86,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 		$this->fetchFunc = 'fetch_csv';
 		return $this;
 	}
-	/**
+	/*!
 	 * Causes the Iterator to return an Object for every row
 	 *
 	 * @return Reference back to result
@@ -95,7 +95,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 		$this->fetchFunc = 'fetch_object';
 		return $this;
 	}
-	/**
+	/*!
 	 * Causes the Iterator to return an Unassociative Array for every row
 	 *
 	 * @return Reference back to result
@@ -104,7 +104,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 		$this->fetchFunc = 'fetch_row';
 		return $this;
 	}
-	/**
+	/*!
 	 * Returns the number of results in the resultset.
 	 *
 	 * @return Number of results in this resultset
@@ -112,7 +112,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	public function count () {
 		return $this->num_rows;
 	}
-	/**
+	/*!
 	 * Returns the current row in the resultset Iterator. This method is 
 	 * not called directly.
 	 *
@@ -123,7 +123,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	public function current () {
 		return $this->currentRow;
 	}
-	/**
+	/*!
 	 * Returns the current row number of the resultset. This method is not
 	 * called directly.
 	 *
@@ -133,7 +133,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	public function key () {
 		return $this->rowNum;
 	}
-	/**
+	/*!
 	 * Moves the Iterator forward. This method is called after 
 	 * FMySQLiResult::valid so there is no worry of death during an 
 	 * iteration. This method is not called directly.
@@ -144,7 +144,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 		$this->currentRow = $this->fetch();
 		++$this->rowNum;
 	}
-	/**
+	/*!
 	 * Places internal Iterator pointer at the beginning of the resultset.
 	 * This method is called before the iteration starts, followed by 
 	 * FMySQLiResult::valid. This method is not called directly.
@@ -155,7 +155,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 		$this->data_seek($this->rowNum = 0);
 		$this->currentRow = $this->fetch();
 	}
-	/**
+	/*!
 	 * Checks to see if there is another result. This is the "check"
 	 * portion of the loop, where the existance of more results is 
 	 * verified. This method is not called directly.
@@ -165,7 +165,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	public function valid () {
 		return $this->rowNum < $this->num_rows;
 	}
-	/**
+	/*!
 	 * Seeks to a specified position.
 	 *
 	 * @param $index position to seek to.
@@ -178,11 +178,11 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 			throw new OutOfBoundsException('Index '.$index.' is invalid.');
 		}
 	}
-	/**
+	/*!
 	 * Using the fetching function specified by FMySQLiResult::as*(), grabs
 	 * the next row in the resultset.
 	 *
-	 * @return Associative Array, Index Array, or Object (default) 
+	 * @return Associative Array, Indexed Array, or Object (default) 
 	 * representation of result row.
 	 */
 	public function fetch () {
@@ -190,7 +190,33 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 		$fetchFunc =& $this->fetchFunc;
 		return $this->$fetchFunc();
 	}
-	/**
+	/*!
+	 * Custom implementation of a result row fetcher to return values in a CSV
+	 * format. Compliments @c fetch_assoc, @c fetch_object, and @c fetch_row.
+	 * 
+	 * This method utilizes @c fputcsv() with default values for separator and
+	 * textual encapsulation. These defaults have proven to be sufficient for
+	 * everyday use and prove the most compatible amongst spreadsheet programs.
+	 * 
+	 * As with the other fetch_* methods, this method is not designed to be
+	 * called directly. To utilize this method, consider the following:
+	 * 
+	 * @code
+	 * $result = FDB::query("SELECT 1");
+	 * $result->asCSV();
+	 * echo $result->fetch();
+	 * @endcode
+	 * 
+	 * A more concise version of the above with looping:
+	 * @code
+	 * $result = FDB::query("SELECT a, b FROM tbl")->asCSV();
+	 * echo $result->headers();
+	 * foreach ($result as $row) {
+	 *     echo $row;
+	 * }
+	 * @endcode
+	 * 
+	 * @return String of this result row's values formatted as a CSV.
 	 */
 	public function fetch_csv () {
 		static $csvh;
@@ -205,7 +231,26 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 		}
 		return $row;
 	}
-	/**
+	/*!
+	 * Fetches the first row of this result. This method will rewind to the
+	 * beginning of a resultset, fetch the first row, and then restore the 
+	 * internal pointer's position.
+	 * 
+	 * An example implementation:
+	 * @code
+	 * $counter = 0;
+	 * $result = FDB::query("SELECT id, name FROM users");
+	 * foreach ($result as $row) {
+	 *     if (++$counter % 10 == 0) {
+	 *         printf("First: %d %s", $row->id, $row->name)
+	 *     }
+	 *     printf("%d %d %s\n", $counter++, $row->id, $row->name);
+	 * }
+	 * @endcode
+	 * 
+	 * @see #fetch()
+	 * @return Associative Array, Indexed Array, or Object (default) 
+	 * representation of first result row.
 	 */
 	public function first () {
 		$this->data_seek(0);
@@ -213,15 +258,23 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 		$this->data_seek($this->rowNum);
 		return $result;
 	}
-	/**
-	 * Returns the query associated with this result. Useful if the query contained a lot of sprintf formatting.
+	/*!
+	 * Returns the query associated with this result. Useful if the query 
+	 * contained a lot of sprintf formatting.
 	 * 
 	 * @return Processed SQL query.
 	 */
 	public function getSQL () {
 		return $this->query;
 	}
-	/**
+	/*!
+	 * Provides the field headers for this result. If the return type of the
+	 * query is @b row (indexed array), @b assoc (associative array), or @b
+	 * object, the headers are returned as an array. If the return type of the 
+	 * query is @b csv, the headers are returned as a string of comma-separated
+	 * values.
+	 * 
+	 * @return Result headers as described above.
 	 */
 	public function headers () {
 		$fields = $this->fetch_fields();

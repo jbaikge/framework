@@ -1,5 +1,5 @@
 <?php
-/**
+/*!
  * Overrides the native mysqli class in PHP. The primary purpose of this object 
  * is to return FMySQLiResult and FMySQLiStatement objects on calls to query 
  * and prepare, respectively. Due to the behavior of the FDB class, this object 
@@ -12,7 +12,7 @@
  * @version $Id$
  */
 class FMySQLi extends mysqli {
-	/**
+	/*!
 	 * Performs a query on the database. The behavior here is different 
 	 * from the native PHP implementation as an Exception is thrown instead 
 	 * of returning false.
@@ -38,7 +38,7 @@ class FMySQLi extends mysqli {
 		$result->query = $query;
 		return $result;
 	}
-	/**
+	/*!
 	 * Prepares a query for execution. Uses the MySQL format for preparing 
 	 * queries as well as the MySQL engine for prepared queries. Prepared 
 	 * statements run once will encounter huge performance hits while 

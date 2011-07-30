@@ -1,5 +1,5 @@
 <?php
-/**
+/*!
  * Database model handler. Takes in database table definitions to pull
  * out any necessary queries required to match the database to the supplied 
  * model.
@@ -26,29 +26,64 @@
 class FDataModel {
 	protected static $modelTables = array(); ///< Collection of FDataModelTable objects
 	protected static $tableQueries = array(); ///< Collection of queries to run after tables are created
-
-	/**
+	/*!
 	 * Prevent object instantiation
 	 */
 	private function __construct () {
 	}
-
-	/**
-	 * Initializes database model by converting all table definition arrays 
-	 * to FDataModelTable objects.
+	/*!
+	 * Adds a single table to the overall data model definition. The @c $model
+	 * parameter must be an array and define the fields for the data model 
+	 * as described above. The model is converted into an FDataModelTable 
+	 * object and added to the collection of tables for the overall model.
+	 * 
+	 * @param $table_name Name of the table to add
+	 * @param $model Array defining the fields for a table
+	 */
+	public static function addTable ($table_name, array $model) {
+		self::$modelTables[$table_name] = new FDataModelTable($table_name, $model);
+	}
+	/*!
+	 * Adds queries to a specific table to be run once all tables in the
+	 * database have been initialized. Note that the @c $queries parameter
+	 * must be an array, even if there is only one query required to
+	 * initialize a table.
+	 * 
+	 * @param $table_name Name of the table to add queries to
+	 * @param $queries Array of queries to add to the table
+	 */
+	public static function addTableQueries ($table_name, array $queries) {
+		self::$tableQueries[$table_name] = $queries;
+	}
+	/*!
+	 * Initializes database model by adding the table definitions to the 
+	 * model's table collection.
 	 *
+	 * @see FDataModel::addTable()
 	 * @param $data_model Array of table models
+	 * @return @c null
 	 */
 	public static function setModel ($data_model) {
-		self::$modelTables = array();
-		foreach ($data_model as $table_name => &$model) {
-			self::$modelTables[$table_name] = new FDataModelTable($table_name, $model);
+		foreach ($data_model as $table_name => $model) {
+			self::addTable($table_name, $model);
 		}
 	}
+	/*!
+	 * Sets any initializing queries that follow the database schema creation.
+	 *
+	 * @param $table_queries Array of queries with each index a table name and
+	 * each value an array of queries.
+	 * @return @c null
+	 */
 	public static function setTableQueries ($table_queries) {
-		self::$tableQueries = $table_queries;
+		if (!$table_queries) {
+			return;
+		}
+		foreach ($table_queries as $table => $queries) {
+			self::addTableQueries($table, $queries);
+		}
 	}
-	/**
+	/*!
 	 * Gathers all necessary SQL to convert the database from its current 
 	 * state to the state defined by the user's database model.
 	 *
@@ -58,21 +93,23 @@ class FDataModel {
 		if (!is_array(self::$modelTables)) {
 			return array();
 		}
-		$queries = array();
+		$creates = array();
+		$initializers = array();
 		foreach (self::$modelTables as $table_name => &$model) {
 			$sql = $model->getSQL();
 			if ($sql) {
-				$queries[$table_name] = $sql;
+				$creates[$table_name] = $sql;
 				if (array_key_exists($table_name, self::$tableQueries) && strpos($sql, 'CREATE') === 0) {
 					foreach (self::$tableQueries[$table_name] as $index => &$table_query) {
-						$queries[$table_name . '_' . $index] = $table_query;
+						$initializers[$table_name . '_' . $index] = $table_query;
 					}
 				}
 			}
 		}
+		$queries = array_merge($creates, $initializers);
 		return $queries;
 	}
-	/**
+	/*!
 	 * @c BIGINT field.
 	 *
 	 * @param $length Optional. Length of data in field.
@@ -83,7 +120,23 @@ class FDataModel {
 		$field->type = 'BIGINT';
 		return $field;
 	}
-	/**
+	/*!
+	 * @c BIGINT foriegn key field with the following properties:
+	 * @li @c UNSIGNED
+	 * @li @c NOT @c NULL
+	 * @li noPrefix
+	 *
+	 * @param $length Optional. Length of data in field.
+	 * @return FDataModelField Object with properties described above
+	 */
+	public static function bigintFK ($length = null) {
+		$field = self::bigint($length);
+		$field->unsigned();
+		$field->notNull();
+		$field->noPrefix();
+		return $field;
+	}
+	/*!
 	 * @c BIGINT primary key field with the following properties:
 	 * @li @c UNSIGNED
 	 * @li @c NOT @c NULL
@@ -98,7 +151,7 @@ class FDataModel {
 		$field->type = 'BIGINT';
 		return $field;
 	}
-	/**
+	/*!
 	 * @c CHAR field.
 	 *
 	 * @param $length Optional. Length of data in field.
@@ -110,7 +163,7 @@ class FDataModel {
 		$field->length = $length;
 		return $field;
 	}
-	/**
+	/*!
 	 * @c DATE field.
 	 *
 	 * @return FDataModelField Object with properties described above
@@ -120,7 +173,7 @@ class FDataModel {
 		$field->type = 'DATE';
 		return $field;
 	}
-	/**
+	/*!
 	 * @c DATETIME field.
 	 *
 	 * @return FDataModelField Object with properties described above
@@ -139,7 +192,7 @@ class FDataModel {
 		return $field;
 		
 	}
-	/**
+	/*!
 	 * @c INT field.
 	 *
 	 * @param $length Optional. Length of data in field.
@@ -151,7 +204,24 @@ class FDataModel {
 		$field->length = $length;
 		return $field;
 	}
-	/**
+	/*!
+	 * @c INT foreign key field with the following properties:
+	 * @li @c UNSIGNED
+	 * @li @c NOT @c NULL
+	 * @li noPrefix
+	 *
+	 * @param $length Optional. Length of data in field.
+	 * @return FDataModelField Object with properties described above
+	 */
+	public static function intFK ($length = null) {
+		$field = self::int($length);
+		$field->autoIncrement();
+		$field->notNull();
+		$field->primary();
+		$field->unsigned();
+		return $field;
+	}
+	/*!
 	 * @c INT primary key field with the following properties:
 	 * @li @c UNSIGNED
 	 * @li @c NOT @c NULL
@@ -169,7 +239,7 @@ class FDataModel {
 		$field->unsigned();
 		return $field;
 	}
-	/**
+	/*!
 	 * @c LONGTEXT field.
 	 *
 	 * @return FDataModelField Object with properties described above
@@ -179,7 +249,7 @@ class FDataModel {
 		$field->type = 'LONGTEXT';
 		return $field;
 	}
-	/**
+	/*!
 	 * @c TEXT field.
 	 *
 	 * @return FDataModelField Object with properties described above
@@ -189,7 +259,7 @@ class FDataModel {
 		$field->type = 'TEXT';
 		return $field;
 	}
-	/**
+	/*!
 	 * @c TIMESTAMP field.
 	 *
 	 * Keep in mind: this field type is allowed to utilize the @c FDataModelField::insertOnly() and the @c 
@@ -202,7 +272,7 @@ class FDataModel {
 		$field->type = 'TIMESTAMP';
 		return $field;
 	}
-	/**
+	/*!
 	 * @c TINYINT field.
 	 *
 	 * @param $length Optional. Length of data in field.
@@ -213,7 +283,7 @@ class FDataModel {
 		$field->type = 'TINYINT';
 		return $field;
 	}
-	/**
+	/*!
 	 * @c TINYINT primary key field with the following properties:
 	 * @li @c UNSIGNED
 	 * @li @c NOT @c NULL
@@ -228,7 +298,7 @@ class FDataModel {
 		$field->type = 'TINYINT';
 		return $field;
 	}
-	/**
+	/*!
 	 * @c VARCHAR field.
 	 *
 	 * @param $length Optional. Length of data in field.

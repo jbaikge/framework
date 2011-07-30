@@ -1,5 +1,5 @@
 <?php
-/**
+/*!
  * @author Jacob Tews <jacob@webteks.com>
  * @date Sun Dec 14 12:39:07 EST 2008
  * @version $Id$

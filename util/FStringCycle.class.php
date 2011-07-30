@@ -1,5 +1,5 @@
 <?php
-/**
+/*!
  * Cycles through passed values. Every time this Object is cast to a String, 
  * the next passed value is returned.
  *
@@ -23,7 +23,7 @@ class FStringCycle {
 	private $index; ///< Current index of strings
 	private $numStrings; ///< Number of strings passed
 	private $strings; ///< Passed strings to cycle through
-	/**
+	/*!
 	 * Sets the Strings to cycle through. Takes one String per argument.
 	 */
 	public function __construct () {
@@ -31,7 +31,7 @@ class FStringCycle {
 		$this->numStrings = count($this->strings);
 		$this->index = -1;
 	}
-	/**
+	/*!
 	 * Convert this Object to a String. Always returns the next string in
 	 * the cycle.
 	 * 
@@ -42,7 +42,7 @@ class FStringCycle {
 			? $this->strings[$this->index]
 			: $this->strings[$this->index = 0];
 	}
-	/**
+	/*!
 	 * Resets the internal pointer for the cycle. Handy if using the 
 	 * same cycle class for multiple instances.
 	 */

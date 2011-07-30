@@ -1,5 +1,5 @@
 <?php
-/**
+/*!
  * A collection of string manipulation methods. These methods are refined 
  * versions of common tasks and should be the fastest possible way to 
  * accomplish many common tasks that usually utilize inefficient methodology.
@@ -10,7 +10,7 @@
  */
 
 class FString {
-	/**
+	/*!
 	 * Determine a string's existence within another string. A blank needle 
 	 * will always cause this method to return true.
 	 *
@@ -30,7 +30,7 @@ class FString {
 			return strpos($haystack, $needle) !== false;
 		}
 	}
-	/**
+	/*!
 	 * Determine whether a string starts with another string.
 	 *
 	 * @see http://blog.modp.com/2007/10/php-string-startswith-let-me-count-ways.html
@@ -47,7 +47,7 @@ class FString {
 			return strncmp($source, $prefix, strlen($prefix)) == 0;
 		}
 	}
-	/**
+	/*!
 	 * Determine whether a string ends with another string.
 	 * @see http://snipplr.com/view/13213/check-if-a-string-ends-with-another-string/
 	 * @param $source The string to check

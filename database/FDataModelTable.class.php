@@ -1,18 +1,94 @@
 <?php
+/*!
+ * Constructs a SQL table definition for automatic instantiation of database
+ * tables. Each field defined for the table must be defined using an
+ * FDataModelField object.
+ * 
+ * SQL generation follows two paths: The first path is to generate a @c CREATE 
+ * @c TABLE query with all fields defined. The second path involves generating
+ * an @c ALTER @c TABLE statement to only change the fields that do not match
+ * the definition. The @c ALTER @c TABLE statement will never remove fields, but
+ * it will change field types and add new fields.
+ * 
+ * Determination of the path is handled by #getSQL() where it determines whether
+ * #getCreate() or #getAlter() are to be used.
+ * 
+ * Example implementation:
+ * @code
+ * $fields = array(
+ *     '_prefix' => 'my_',
+ *     '_engine' => 'MyISAM',
+ *     'id' => FDataModel::intPK(),
+ *     'name' => FDataModel::varchar(128)->notNull()
+ * );
+ * 
+ * $model = new FDataModelTable('my_table', $fields);
+ * echo $model->getSQL();
+ * @endcode
+ * 
+ * Output (formatted for readability):
+ * @code
+ * CREATE TABLE IF NOT EXISTS `my_table` (
+ *     my_id INT UNSIGNED NOT NULL AUTO_INCREMENT, 
+ *     my_name VARCHAR(128) NOT NULL, 
+ *     PRIMARY KEY (my_id)
+ * ) ENGINE=MyISAM DEFAULT CHARSET=utf8
+ * @endcode
+ * 
+ * @author Jacob Tews <jtews@okco.com>
+ * @date Sat Dec  5 17:34:15 EST 2009
+ * @version $Id$
+ */
 class FDataModelTable {
+	/*!
+	 * Internal flag to determine whether #setupFields() ran
+	 */
 	private $setupComplete = false;
+	/*!
+	 * Table engine type. Default: InnoDB
+	 */
 	protected $engine = 'InnoDB';
+	/*!
+	 * Array of fields as outlined in the class documentation
+	 */
 	protected $fields;
+	/*!
+	 * Retains the keys for indexes, primary, unique, foreign, and fulltext
+	 */
 	protected $keys;
+	/*!
+	 * Default field prefix. Only applies to fields if noPrefix() was not
+	 * called. Default: ""
+	 */
 	protected $prefix = '';
+	/*!
+	 * Table name
+	 */
 	protected $table;
-
+	/*!
+	 * Initializes a table definition to begin defining the SQL required to
+	 * either create or alter the table.
+	 * 
+	 * @param $table Table name
+	 * @param $fields Array of field definitions with each key defining the
+	 * field name and the value a FDataModelField object.
+	 */
 	public function __construct ($table, $fields) {
 		$this->table = $table;
 		$this->fields = $fields;
 		if (array_key_exists('_prefix', $fields)) $this->prefix = $fields['_prefix'];
 		if (array_key_exists('_engine', $fields)) $this->engine = $fields['_engine'];
 	}
+	/*!
+	 * Establishes the internal structure of the table's indexes and keys. This
+	 * method does not have a return but modifies the #$keys field according to
+	 * each fields' definitions.
+	 * 
+	 * It is typically called by other methods to ensure the proper indexes
+	 * have been established before continuing processing.
+	 * 
+	 * @return null
+	 */
 	public function setupFields () {
 		if ($this->setupComplete) {
 			return;
@@ -68,6 +144,19 @@ class FDataModelTable {
 		}
 		$this->setupComplete = true;
 	}
+	/*!
+	 * Generates the proper @c CREATE @c TABLE syntax for the defined table.
+	 * 
+	 * Possible errors thrown:
+	 * @li "ON UPDATE does not match for all fields" - Triggered when a
+	 * composite foreign key is established and all @c ON @c UPDATE definitions
+	 * do not match.
+	 * @li "ON DELETE does not match for all fields" - Triggered when a
+	 * composite foreign key is established and all @c ON @c DELETE definitions
+	 * do not match.
+	 * 
+	 * @return String with entire @c CREATE @c TABLE statement
+	 */
 	public function getCreate () {
 		$this->setupFields();
 		$statements = array();
@@ -122,6 +211,18 @@ class FDataModelTable {
 
 		return $sql;
 	}
+	/*!
+	 * Generates the @c ALTER @c TABLE query for a table with a modified
+	 * structure, if necessary.
+	 * 
+	 * If the table does not already exist, the method falls out early with a 
+	 * @c false return.
+	 * 
+	 * If the structure defined is the same as the structure of the existing
+	 * table, the method will complete with a @c false return.
+	 * 
+	 * @return @c ALTER @c TABLE query if applicable, @c false otherwise.
+	 */
 	public function getAlter () {
 		$info_result = FDB::query(
 			"SELECT NULL FROM information_schema.TABLES WHERE TABLE_SCHEMA = '%s' AND TABLE_NAME = '%s'",
@@ -177,6 +278,15 @@ class FDataModelTable {
 			return false;
 		}
 	}
+	/*!
+	 * Fetches necessary SQL to operate on the defined table. If the table
+	 * already exists and needs a structural update, an @c ALTER @c TABLE
+	 * statement is returned. If the table does not exist, a @c CREATE @c TABLE
+	 * statement is returned. If the table exists and there is nothing to
+	 * change, @c false is returned.
+	 * 
+	 * @return Query or @c false as describe above
+	 */
 	public function getSQL () {
 		$sql = $this->getAlter();
 		if ($sql === false && FDB::query("SHOW TABLES LIKE '%s'", $this->table)->count() == 0) {

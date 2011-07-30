@@ -98,6 +98,11 @@ $_ENV['config']['session.use_db']          = false;
  */
 $_ENV['config']['templates.base_template'] = 'templates/base.html.php';
 /**
+ * Form and Field template directories.
+ */
+$_ENV['config']['templates.form.dir']      = array(&$_ENV['config']['library.dir'], 'framework', 'form', 'templates');
+$_ENV['config']['templates.form.field.dir'] = array(&$_ENV['config']['library.dir'], 'framework', 'form', 'field', 'templates');
+/**
  * Filters to run before returning content in FTemplate::render(). They are 
  * run in the same order they are provided in the array.
  */
@@ -107,7 +112,9 @@ $_ENV['config']['templates.filters']       = array('FWebrootFilter');
 // Merge in the configuration options specified in the webroot:
 ///////////////////////////////////////////////////////////////////////////////
 if (isset($config) && is_array($config)) {
-	$_ENV['config'] = array_merge($_ENV['config'], $config);
+	foreach ($config as $key => $value) {
+		$_ENV['config'][$key] = $value;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -150,32 +157,17 @@ if ($_ENV['config']['database.auto_connect'] && $_ENV['config']['session.use_db'
 	new FDBSessionHandler();
 }
 
+if (is_array($_ENV['config']['templates.form.dir'])) {
+	$_ENV['config']['templates.form.dir'] = implode(DS, $_ENV['config']['templates.form.dir']);
+}
+
+if (is_array($_ENV['config']['templates.form.field.dir'])) {
+	$_ENV['config']['templates.form.field.dir'] = implode(DS, $_ENV['config']['templates.form.field.dir']);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Secret Call processing:
 ///////////////////////////////////////////////////////////////////////////////
 if (isset($_GET['UPDATE_DATABASE']) && $_GET['UPDATE_DATABASE'] == $_ENV['config']['secret']) {
-	$database_config = FFileSystem::fileExists('database.conf.php');
-	if ($database_config) {
-		header('Content-Type: text/plain');
-		require($database_config);
-		$queries = FDataModel::getQueries();
-		FDB::query("SET FOREIGN_KEY_CHECKS=0");
-		foreach ($queries as $name => $query) {
-			printf("Building `%s` ... ", $name); flush();
-			try {
-				FDB::query($query);
-			} catch (Exception $e) {
-				echo "\n\nException:\n";
-				echo $e->getMessage();
-				echo "\n\nWarnings:\n";
-				foreach (FDB::query("SHOW WARNINGS")->asRow() as $row) {
-					vprintf("%10s %4d %s\n", $row);
-				}
-				exit;
-			}
-			echo "Done\n";
-		}
-		FDB::query("SET FOREIGN_KEY_CHECKS=1");
-		exit;
-	}
+	sync_database();
 }

@@ -49,6 +49,7 @@ class FString {
 	}
 	/*!
 	 * Determine whether a string ends with another string.
+	 *
 	 * @see http://snipplr.com/view/13213/check-if-a-string-ends-with-another-string/
 	 * @param $source The string to check
 	 * @param $suffix The string to check with
@@ -62,6 +63,36 @@ class FString {
 			return strcasecmp($substr, $suffix) == 0;
 		} else {
 			return strcmp($substr, $suffix) == 0;
+		}
+	}
+	/*!
+	 * Formats any given date into the standard format defined by the
+	 * configuration directives format.date and format.datetime.
+	 *
+	 * @param $date A string, timestamp or DateTime instance representing a date
+	 * @return The date, formatted per the configuration of format.date or
+	 * format.datetime
+	 */
+	public static function date ($date, $format_override = null) {
+		if ($date === null || $date === false || $date === '') {
+			return null;
+		}
+		// Safety check 
+		if ($format_override == '') $format_override = null;
+		if (!is_numeric($date) && !($date instanceof DateTime)) {
+			$date = strtotime($date);
+		}
+		if (!($date instanceof DateTime)) {
+			$value = $date;
+			$date = new DateTime(null);
+			$date->setTimestamp($value);
+		}
+		if ($format_override === null && $date->format('His') == 0) {
+			return $date->format($_ENV['config']['format.date']);
+		} else if ($format_override === null) {
+			return $date->format($_ENV['config']['format.datetime']);
+		} else {
+			return $date->format($format_override);
 		}
 	}
 }

@@ -31,7 +31,7 @@ class FFileSystem {
 		foreach ($paths as &$path) {
 			$fullpath = $path . DIRECTORY_SEPARATOR . $filename;
 			if (file_exists($fullpath)) {
-				return str_replace('//', '/', $fullpath);
+				return realpath(str_replace('//', '/', $fullpath));
 			}
 		}
 		return false;

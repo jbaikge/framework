@@ -103,10 +103,22 @@ $_ENV['config']['templates.base_template'] = 'templates/base.html.php';
 $_ENV['config']['templates.form.dir']      = array(&$_ENV['config']['library.dir'], 'framework', 'form', 'templates');
 $_ENV['config']['templates.form.field.dir'] = array(&$_ENV['config']['library.dir'], 'framework', 'form', 'field', 'templates');
 /**
+ * Calendar template directory.
+ */
+$_ENV['config']['templates.calendar.dir']  = array(&$_ENV['config']['library.dir'], 'framework', 'calendar', 'templates');
+/**
  * Filters to run before returning content in FTemplate::render(). They are 
  * run in the same order they are provided in the array.
  */
 $_ENV['config']['templates.filters']       = array('FWebrootFilter');
+/**
+ * Default date / time format settings. These can be overridden by webroot if 
+ * necessary. Format matches the format defined in the PHP date() documentation.
+ * @see http://php.net/manual/en/function.date.php
+ */
+$_ENV['config']['format.date'] = 'M j, Y';
+$_ENV['config']['format.time'] = 'g:i a';
+$_ENV['config']['format.datetime'] = $_ENV['config']['format.date'] . ' ' . $_ENV['config']['format.time'];
 
 ///////////////////////////////////////////////////////////////////////////////
 // Merge in the configuration options specified in the webroot:
@@ -163,6 +175,10 @@ if (is_array($_ENV['config']['templates.form.dir'])) {
 
 if (is_array($_ENV['config']['templates.form.field.dir'])) {
 	$_ENV['config']['templates.form.field.dir'] = implode(DS, $_ENV['config']['templates.form.field.dir']);
+}
+
+if (is_array($_ENV['config']['templates.calendar.dir'])) {
+	$_ENV['config']['templates.calendar.dir'] = implode(DS, $_ENV['config']['templates.calendar.dir']);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

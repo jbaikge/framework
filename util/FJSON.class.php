@@ -14,8 +14,12 @@ class FJSON {
 	 * @param $object Object or array to encode
 	 * @return string JSON-encoded string
 	 */
-	public static function encode ($object) {
-		return json_encode($object);
+	public static function encode ($object = null) {
+		if ($object) {
+			return json_encode($object);
+		} else {
+			return null;
+		}
 	}
 	/*!
 	 * Decodes a JSON-encoded string into a PHP variable
@@ -30,8 +34,18 @@ class FJSON {
 	 * @return mixed Returns the value encoded in the supplied JSON as the
 	 * appropriate PHP value.
 	 */
-	public static function decode ($json, $assoc = false, $depth = 512, $options = 0) {
-		$result = json_decode($json, $assoc, $depth, $options);
+	public static function decode ($json, $assoc = false, $depth = 512, $options = null) {
+		if ($options !== null) {
+			if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
+				$result = json_decode($json, $assoc, $depth, $options);
+			} else {
+				trigger_error("json_decode does not support the options parameter until version 5.4.0.", E_USER_WARNING);
+				$result = json_decode($json, $assoc, $depth);
+			}
+		} else {
+			$result = json_decode($json, $assoc, $depth);
+		}
+		
 		$errors = array(
 			JSON_ERROR_DEPTH => 'Maximum stack depth exceeded',
 			JSON_ERROR_CTRL_CHAR => 'Unexpected control character found',

@@ -109,9 +109,16 @@ abstract class FObject implements Serializable, FObjectInterface {
 				list($type, $name) = $hook_bits;
 				$this->observers['hooks'][$name][$type][] = $class_name;
 			} else {
-				// If two drivers have the same method, the last one will
-				// override
-				$this->observers['methods'][$method] = $class_name;
+				// If two drivers have the same method, the one at the end of
+				// the inheretence change will be the one chosen.
+				if (isset($this->observers['methods'][$method])) {
+					$original_class = $this->observers['methods'][$method];
+					if ($class_name instanceof $original_class) {
+						$this->observers['methods'][$method] = $class_name;
+					}
+				} else {
+					$this->observers['methods'][$method] = $class_name;
+				}
 			}
 		}
 	}

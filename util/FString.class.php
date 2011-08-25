@@ -30,6 +30,9 @@ class FString {
 			return strpos($haystack, $needle) !== false;
 		}
 	}
+	public static function labelize ($string) {
+		return ucwords(str_replace('_', ' ', $string));
+	}
 	/*!
 	 * Determine whether a string starts with another string.
 	 *

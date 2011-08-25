@@ -41,4 +41,8 @@ class FFormInstance extends FForm {
 	public function makeFields() {
 		return $this->instance->makeFields();
 	}
+	public function rebuildFields () {
+		parent::rebuildFields();
+		$this->load($this->instance->getData());
+	}
 }

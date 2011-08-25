@@ -84,6 +84,9 @@ abstract class FForm extends FFormUtils {
 		}
 		return $instance;
 	}
+	public function rebuildFields () {
+		$this->_fieldCache(false);
+	}
 	/*!
 	 * @todo Document FForm::valid()
 	 * 

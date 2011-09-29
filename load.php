@@ -179,7 +179,7 @@ if ($_ENV['config']['database.auto_connect'] && $_ENV['config']['session.use_db'
 	new FDBSessionHandler();
 }
 
-if ($_ENV['config']['report.node']) {
+if ($_ENV['config']['report.enabled']) {
 	set_error_handler(array('FCallback', 'errorHandler'));
 	register_shutdown_function(array('FCallback', 'shutdown'));
 }

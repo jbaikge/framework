@@ -33,6 +33,9 @@ class FCallback {
 		return true;
 	}
 	public static function shutdown () {
+		if (!$_ENV['config']['report.enabled']) {
+			return;
+		}
 		$freq = $_ENV['config']['report.frequency'] * 10;
 		if (FLog::hasMessages() || rand(0, 999) < $freq) {
 			FLog::set('execution_time', microtime(true) - START_TIME);

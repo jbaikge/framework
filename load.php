@@ -86,7 +86,7 @@ $_ENV['config']['library.dir.signals']     = $_ENV['config']['library.dir'] . DS
 /**
  * Enable or disable the use of the reporting node network
  */
-$_ENV['config']['report.node']             = true;
+$_ENV['config']['report.enabled']          = true;
 /**
  * Likelihood that a status report will be sent to the network. Value is a
  * percentage from 0.0 - 100.0.

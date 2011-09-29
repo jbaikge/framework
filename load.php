@@ -84,6 +84,16 @@ $_ENV['config']['html.xhtml']              = false;
 $_ENV['config']['library.dir']             = SITEROOT . DS . 'lib';
 $_ENV['config']['library.dir.signals']     = $_ENV['config']['library.dir'] . DS . 'signals';
 /**
+ * Enable or disable the use of the reporting node network
+ */
+$_ENV['config']['report.node']             = true;
+/**
+ * Likelihood that a status report will be sent to the network. Value is a
+ * percentage from 0.0 - 100.0.
+ */
+$_ENV['config']['report.frequency']        = 10.0;
+$_ENV['config']['report.cache']            = array(&$_ENV['config']['cache.dir'], '.private', 'node_servers.php');
+/**
  * Secret string used to gain access to certain diagnostic tools. If undefined 
  * in user-defined configuraiton, set to rand() to prevent unwarranted access.
  */
@@ -169,6 +179,11 @@ if ($_ENV['config']['database.auto_connect'] && $_ENV['config']['session.use_db'
 	new FDBSessionHandler();
 }
 
+if ($_ENV['config']['report.node']) {
+	set_error_handler(array('FCallback', 'errorHandler'));
+	register_shutdown_function(array('FCallback', 'shutdown'));
+}
+
 if (is_array($_ENV['config']['templates.form.dir'])) {
 	$_ENV['config']['templates.form.dir'] = implode(DS, $_ENV['config']['templates.form.dir']);
 }
@@ -181,9 +196,16 @@ if (is_array($_ENV['config']['templates.calendar.dir'])) {
 	$_ENV['config']['templates.calendar.dir'] = implode(DS, $_ENV['config']['templates.calendar.dir']);
 }
 
+if (is_array($_ENV['config']['report.cache'])) {
+	$_ENV['config']['report.cache'] = implode(DS, $_ENV['config']['report.cache']);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Secret Call processing:
 ///////////////////////////////////////////////////////////////////////////////
 if (isset($_GET['UPDATE_DATABASE']) && $_GET['UPDATE_DATABASE'] == $_ENV['config']['secret']) {
 	sync_database();
+}
+if (isset($_GET['UPDATE_SERVER_LIST']) && $_GET['UPDATE_SERVER_LIST'] == $_ENV['config']['secret']) {
+	FNodeMessenger::refreshServerList();
 }

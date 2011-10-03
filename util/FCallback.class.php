@@ -26,7 +26,7 @@ class FCallback {
 				'type' => 'error',
 				'message' => $errstr,
 				'file' => $errfile,
-				'line' => (int)$errline
+				'line' => $errline
 			),
 			self::$errorMap[$errno]
 		));
@@ -39,7 +39,7 @@ class FCallback {
 		$freq = $_ENV['config']['report.frequency'] * 10;
 		if (FLog::hasMessages() || rand(0, 999) < $freq) {
 			FLog::set('execution_time', microtime(true) - START_TIME);
-			FLog::set('memory_usage', (int)memory_get_usage());
+			FLog::set('memory_usage', (string)memory_get_usage());
 			FLog::set('server_name', isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'CLI');
 			FLog::set('uri', isset($_SERVER['SERVER_NAME']) ? $_SERVER['REQUEST_URI'] : $_SERVER['SCRIPT_NAME']);
 			FNodeMessenger::sendFLog();

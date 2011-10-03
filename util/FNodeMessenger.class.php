@@ -39,7 +39,7 @@ class FNodeMessenger {
 			'data' => $data
 		);
 		$json = json_encode($data);
-		$json = preg_replace('/"(\d{19})"/', '$1', $json);
+		$json = preg_replace('/"(\d+)"/', '$1', $json);
 		$uuid = substr(sha1($json), 0, 20);
 		self::chunkSend($json, $uuid);
 	}

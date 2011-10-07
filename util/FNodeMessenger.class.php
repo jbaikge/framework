@@ -76,11 +76,11 @@ class FNodeMessenger {
 		$cache = $_ENV['config']['report.cache'];
 		$cache_override = $_ENV['config']['report.my_cache'];
 		if (file_exists($cache_override)) {
-			include($cache_override);
+			require($cache_override);
 		}
 		else if (!file_exists($cache) || filemtime($cache) < time()) {
 			touch($_ENV['config']['report.cache'], time() + 10);
-			$command = 'curl "http://' . $_SERVER['SERVER_NAME'] . '?UPDATE_SERVER_LIST=' . $_ENV['config']['secret'] . '"';
+			$command = 'curl "http://' . $_SERVER['SERVER_NAME'] . WEBROOT . '?UPDATE_SERVER_LIST=' . $_ENV['config']['secret'] . '"';
 			popen($command, 'r');
 		}
 		else if (file_exists($cache)) {
@@ -88,6 +88,7 @@ class FNodeMessenger {
 			shuffle($servers);
 		}
 
+		var_dump($cache, $cache_override, $servers);
 		if ($servers) {
 			$num_servers = 1;
 			return $nodes = array_slice($servers, 0, $num_servers);

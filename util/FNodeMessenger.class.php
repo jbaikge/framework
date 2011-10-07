@@ -88,7 +88,6 @@ class FNodeMessenger {
 			shuffle($servers);
 		}
 
-		var_dump($cache, $cache_override, $servers);
 		if ($servers) {
 			$num_servers = 1;
 			return $nodes = array_slice($servers, 0, $num_servers);

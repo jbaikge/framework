@@ -196,21 +196,19 @@ if ($_ENV['config']['report.enabled']) {
 	register_shutdown_function(array('FCallback', 'shutdown'));
 }
 
-if (is_array($_ENV['config']['templates.form.dir'])) {
-	$_ENV['config']['templates.form.dir'] = implode(DS, $_ENV['config']['templates.form.dir']);
+$implode_keys = array(
+	'templates.form.dir',
+	'templates.form.field.dir',
+	'templates.calendar.dir',
+	'report.cache',
+	'report.my_cache',
+);
+foreach ($implode_keys as $key) {
+	if (is_array($_ENV['config'][$key])) {
+		$_ENV['config'][$key] = implode(DS, $_ENV['config'][$key]);
+	}
 }
-
-if (is_array($_ENV['config']['templates.form.field.dir'])) {
-	$_ENV['config']['templates.form.field.dir'] = implode(DS, $_ENV['config']['templates.form.field.dir']);
-}
-
-if (is_array($_ENV['config']['templates.calendar.dir'])) {
-	$_ENV['config']['templates.calendar.dir'] = implode(DS, $_ENV['config']['templates.calendar.dir']);
-}
-
-if (is_array($_ENV['config']['report.cache'])) {
-	$_ENV['config']['report.cache'] = implode(DS, $_ENV['config']['report.cache']);
-}
+unset($implode_keys, $key);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Secret Call processing:

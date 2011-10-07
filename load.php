@@ -94,6 +94,18 @@ $_ENV['config']['report.enabled']          = true;
 $_ENV['config']['report.frequency']        = 10.0;
 $_ENV['config']['report.cache']            = array(&$_ENV['config']['cache.dir'], '.private', 'node_servers.php');
 /**
+ * Override the server cache with your own. Make sure the contents look like
+ * this:
+ * <?php
+ * $servers = array(
+ *     'mine' => array(
+ *         'host' => 'localhost',
+ *         'ports' => array(8000, 8010)
+ *     )
+ * );
+ */
+$_ENV['config']['report.my_cache']         = array(&$_ENV['config']['cache.dir'], '.private', 'my_node_servers.php');
+/**
  * Secret string used to gain access to certain diagnostic tools. If undefined 
  * in user-defined configuraiton, set to rand() to prevent unwarranted access.
  */

@@ -41,7 +41,6 @@ class FNodeMessenger {
 		$json = json_encode($data);
 		$json = preg_replace('/"(\d+)"/', '$1', $json);
 		$uuid = substr(sha1($json), 0, 20);
-		print($json);
 		self::chunkSend($json, $uuid);
 	}
 
@@ -73,6 +72,7 @@ class FNodeMessenger {
 		if ($nodes) {
 			return $nodes;
 		}
+
 		$cache = $_ENV['config']['report.cache'];
 		$cache_override = $_ENV['config']['report.my_cache'];
 		if (file_exists($cache_override)) {
@@ -82,12 +82,17 @@ class FNodeMessenger {
 			touch($_ENV['config']['report.cache'], time() + 10);
 			$command = 'curl "http://' . $_SERVER['SERVER_NAME'] . '?UPDATE_SERVER_LIST=' . $_ENV['config']['secret'] . '"';
 			popen($command, 'r');
-			return array();
-		} else {
+		}
+		else if (file_exists($cache)) {
 			include($cache);
-			$num_servers = 1;
 			shuffle($servers);
+		}
+
+		if ($servers) {
+			$num_servers = 1;
 			return $nodes = array_slice($servers, 0, $num_servers);
+		} else {
+			return array();
 		}
 	}
 

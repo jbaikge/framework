@@ -133,8 +133,6 @@ class FDB {
 			if (!self::$slave || mysqli_connect_errno()) {
 				throw new Exception("Could not connect to slave database:" . NEWLINE . mysqli_connect_error());
 			}
-			FDB::slave("SET NAMES 'utf8'");
-			FDB::master("SET NAMES 'utf8'");
 		} else {
 			// Just one database to accept all queries
 			self::$master = new FMySQLi(
@@ -147,7 +145,6 @@ class FDB {
 				throw new Exception("Could not connect to database:>" . NEWLINE . mysqli_connect_error());
 			}
 			self::$slave =& self::$master;
-			FDB::master("SET NAMES 'utf8'");
 		}
 	}
 	/*!

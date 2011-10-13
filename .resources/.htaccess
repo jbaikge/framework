@@ -2,5 +2,13 @@
 	Deny From All
 </FilesMatch>
 Options +MultiViews
-php_value include_path ".:..:../..:../../..:../../../..:../../../../..:../../../../../..:;.;..;../..;../../..;../../../..;../../../../..;../../../../../.."
-
+<IfModule !mod_suphp.c>
+	php_value include_path ".:..:../..:../../..:../../../..:../../../../..:../../../../../..:;.;..;../..;../../..;../../../..;../../../../..;../../../../../.."
+	php_value magic_quotes_gpc 0
+	php_value upload_max_filesize 256M
+	php_value post_max_size 256M
+	php_value memory_limit 256M
+</IfModule>
+<IfModule mod_suphp.c>
+	suPHP_ConfigPath /etc/php-framework/
+</IfModule>

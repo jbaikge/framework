@@ -80,7 +80,7 @@ class FNodeMessenger {
 		}
 		else if (!file_exists($cache) || filemtime($cache) < time()) {
 			touch($_ENV['config']['report.cache'], time() + 10);
-			$command = 'curl "http://' . $_SERVER['SERVER_NAME'] . WEBROOT . '?UPDATE_SERVER_LIST=' . $_ENV['config']['secret'] . '"';
+			$command = 'curl -s "http://' . $_SERVER['SERVER_NAME'] . WEBROOT . '?UPDATE_SERVER_LIST=' . $_ENV['config']['secret'] . '"';
 			popen($command, 'r');
 		}
 		else if (file_exists($cache)) {

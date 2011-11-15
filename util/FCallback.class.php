@@ -30,6 +30,9 @@ class FCallback {
 			),
 			self::$errorMap[$errno]
 		));
+		if ($errno == E_RECOVERABLE_ERROR) {
+			throw new RecoverableException($errstr);
+		}
 		return true;
 	}
 	public static function shutdown () {

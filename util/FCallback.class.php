@@ -39,7 +39,14 @@ class FCallback {
 		if (!$_ENV['config']['report.enabled']) {
 			return;
 		}
-		$freq = $_ENV['config']['report.frequency'] * 10;
+
+		$header_freq = (int)$_SERVER['HTTP_X_NODE_FREQ'];
+		if (0 <= $header_freq && $header_freq <= 100) {
+			$freq = $header_freq * 10;
+		} else {
+			$freq = $_ENV['config']['report.frequency'] * 10;
+		}
+
 		if (FLog::hasMessages() || rand(0, 999) < $freq) {
 			FLog::set('execution_time', microtime(true) - START_TIME);
 			FLog::set('memory_usage', (string)memory_get_usage());

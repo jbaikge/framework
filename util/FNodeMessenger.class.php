@@ -75,7 +75,16 @@ class FNodeMessenger {
 
 		$cache = $_ENV['config']['report.cache'];
 		$cache_override = $_ENV['config']['report.my_cache'];
-		if (file_exists($cache_override)) {
+		$port = (int)$_SERVER['HTTP_X_NODE_PORT'];
+		if (0 < $port && $port < 65535) {
+			$servers = array(
+				'local' => array(
+					'host' => 'localhost',
+					'ports' => array($port, $port)
+				)
+			);
+		}
+		else if (file_exists($cache_override)) {
 			require($cache_override);
 		}
 		else if (!file_exists($cache) || filemtime($cache) < time()) {
@@ -87,7 +96,6 @@ class FNodeMessenger {
 			include($cache);
 			shuffle($servers);
 		}
-
 		if ($servers) {
 			$num_servers = 1;
 			return $nodes = array_slice($servers, 0, $num_servers);

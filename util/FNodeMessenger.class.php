@@ -75,7 +75,7 @@ class FNodeMessenger {
 
 		$cache = $_ENV['config']['report.cache'];
 		$cache_override = $_ENV['config']['report.my_cache'];
-		$port = (int)$_SERVER['HTTP_X_NODE_PORT'];
+		$port = isset($_SERVER['HTTP_X_NODE_PORT']) ? (int)$_SERVER['HTTP_X_NODE_PORT'] : -1;
 		if (0 < $port && $port < 65535) {
 			$servers = array(
 				'local' => array(

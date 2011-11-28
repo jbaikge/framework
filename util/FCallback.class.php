@@ -40,7 +40,7 @@ class FCallback {
 			return;
 		}
 
-		$header_freq = (int)$_SERVER['HTTP_X_NODE_FREQ'];
+		$header_freq = isset($_SERVER['HTTP_X_NODE_FREQ']) ? (int)$_SERVER['HTTP_X_NODE_FREQ'] : -1;
 		if (0 <= $header_freq && $header_freq <= 100) {
 			$freq = $header_freq * 10;
 		} else {

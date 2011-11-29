@@ -71,6 +71,8 @@ class FNodeMessenger {
 		static $nodes;
 		if ($nodes) {
 			return $nodes;
+		} else if (isset($_GET['UPDATE_SERVER_LIST'])) {
+			return array();
 		}
 
 		$cache = $_ENV['config']['report.cache'];

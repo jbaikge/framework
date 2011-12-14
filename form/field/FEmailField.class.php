@@ -36,9 +36,9 @@ class FEmailField extends FFormField {
 	 */
 	public function validate () {
 		list ($valid, $value) = parent::validate();
-		if ($valid && $value != $this->getRawValue()) {
+		if (!$valid && $this->getValue() != $this->getRawValue()) {
 			$valid = false;
-			$error_message = $this->get('error_invalid', 'Invalid E-Mail address: %s');
+			$error_message = $this->get('error_invalid', 'Invalid Email address: %s');
 			$this->error($value = sprintf($error_message, $this->getRawValue()));
 		}
 		return array($valid, $value);

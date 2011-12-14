@@ -4,10 +4,12 @@
 		<ol>
 <?php
 foreach($form->getFields() as $field) {
-	echo "<li>" . FTemplate::fetch($field->getTemplate(), array('field' => &$field, 'form' => &$form)) . "</li>";
+	echo "<li>\n" . FTemplate::fetch($field->getTemplate(), array('field' => &$field, 'form' => &$form)) . "</li>\n";
 }
 ?>
 		</ol>
-		<input type="Submit" value="Submit">
+		<div class="buttons">
+			<input type="Submit" value="Submit" class="FSubmitButton">
+		</div>
 	</fieldset>
 </form>

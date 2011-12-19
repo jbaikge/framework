@@ -8,6 +8,7 @@
  */
 
 define('START_TIME', microtime(true));
+define('START_MEM', memory_get_usage());
 define('NEWLINE', isset($_ENV['SHELL']) ? "\n" : '<br>');
 define('DS', DIRECTORY_SEPARATOR);
 setlocale(LC_ALL, array('en_US', 'en_US.UTF-8'));

@@ -158,9 +158,14 @@ class FCalendarMonth extends FCalendar {
 	}
 	private function setStartEnd ($date, $format) {
 		$this->dateStart = DateTime::createFromFormat($format, $date);
+		if ($this->dateStart === false) {
+			throw new FInvalidDateTimeException($date);
+		}
 		// Determine the end of the month to get the number of days:
 		$this->dateEnd = clone($this->dateStart);
 		$this->dateEnd->modify('+1 month -1 day');
 		$this->numDays = (int)$this->dateStart->diff($this->dateEnd)->format('%a') + 1;
 	}
 }
+
+class FInvalidDateTimeException extends Exception {}

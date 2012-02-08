@@ -52,6 +52,7 @@ class FCallback {
 			FLog::set('memory_usage', (string)(memory_get_usage() - START_MEM));
 			FLog::set('server_name', isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'CLI');
 			FLog::set('uri', isset($_SERVER['SERVER_NAME']) ? $_SERVER['REQUEST_URI'] : $_SERVER['SCRIPT_NAME']);
+			FLog::set('referer', isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '');
 			FNodeMessenger::sendFLog();
 		}
 	}

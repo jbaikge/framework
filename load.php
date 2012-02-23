@@ -27,7 +27,8 @@ while (!file_exists($file_path . "/webroot.conf.php") && $file_path != ($tmp_pat
 	$include_path .= PATH_SEPARATOR . ($file_path = $tmp_path);
 }
 
-ini_set('include_path', $include_path);
+ini_restore('include_path');
+ini_set('include_path', $include_path . PATH_SEPARATOR . ini_get('include_path'));
 define('SITEROOT', $file_path);
 
 // Determine webroot:
@@ -180,6 +181,8 @@ if (!is_dir($_ENV['config']['cache.dir'] . DS . '.private')) {
 // Post-merge processing:
 ///////////////////////////////////////////////////////////////////////////////
 $_ENV['config']['cache.class_list']        = $_ENV['config']['cache.dir'] . DS . $_ENV['config']['cache.class_list'];
+$_ENV['config']['firephp.class']           = FFileSystem::fileExists('FirePHPCore/FirePHP.class.php');
+
 
 if ($_ENV['config']['database.auto_connect']) {
 	FDB::connect();
@@ -192,6 +195,11 @@ if ($_ENV['config']['database.auto_connect'] && $_ENV['config']['session.use_db'
 	new FDBSessionHandler();
 }
 
+if ($_ENV['config']['firephp.class'] != false) {
+	include($_ENV['config']['firephp.class']);
+	// Register to false out the exception throwing.
+	FirePHP::getInstance(true)->registerErrorHandler(false);
+}
 if ($_ENV['config']['report.enabled']) {
 	set_error_handler(array('FCallback', 'errorHandler'));
 	register_shutdown_function(array('FCallback', 'shutdown'));

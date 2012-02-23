@@ -20,8 +20,8 @@ class FCallback {
 		E_DEPRECATED => array('color' => "blue", 'level' => "Deprecated"),
 		E_USER_DEPRECATED => array('color' => "blue", 'level' => "User Deprecated"),
 	);
-	public static function errorHandler ($errno, $errstr, $errfile, $errline) {
-		FLog::message(array_merge(
+	public static function errorHandler ($errno, $errstr, $errfile, $errline, $errcontext) {
+		FLog::message($m = array_merge(
 			array(
 				'type' => 'error',
 				'message' => $errstr,
@@ -30,6 +30,11 @@ class FCallback {
 			),
 			self::$errorMap[$errno]
 		));
+		if ($_ENV['config']['firephp.class'] != false) {
+			$previous = error_reporting(E_ALL | E_STRICT);
+			FirePHP::getInstance()->errorHandler($errno, $errstr, $errfile, $errline, $errcontext);
+			error_reporting($previous);
+		}
 		if ($errno == E_RECOVERABLE_ERROR) {
 			throw new RecoverableException($errstr);
 		}

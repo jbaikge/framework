@@ -32,7 +32,7 @@ class FMySQLi extends mysqli {
 		if (!$this->real_query($query)) {
 			/// @todo Put an exception or some form of error 
 			/// handling here
-			throw new Exception($this->error);
+			throw new Exception($this->error, $this->errno);
 		}
 		$result = new FMySQLiResult($this, $resultmode);
 		$result->query = $query;

@@ -26,9 +26,9 @@ class FFormMultiStepProcessableDriver extends FFormProcessableDriver {
 		$fields = parent::makeFields();
 		$step = (int)$this->subject->getFormStep();
 		$num_fields = count($fields);
-		for ($i = 0; $i < $num_fields; $i++) {
-			if ($fields[$i]->get('step', 0) != $step) {
-				unset($fields[$i]);
+		foreach (array_keys($fields) as $key) {
+			if ($fields[$key]->get('step', 0) != $step) {
+				unset($fields[$key]);
 			}
 		}
 		// Re-index:

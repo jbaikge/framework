@@ -217,7 +217,7 @@ class FMySQLiResult implements Countable, SeekableIterator {
 		if ($this->result->data_seek($index)) {
 			$this->rowNum = $index;
 			$this->currentRow = $this->fetch();
-		} else {
+		} else if ($index > 0) {
 			throw new OutOfBoundsException('Index '.$index.' is invalid.');
 		}
 	}

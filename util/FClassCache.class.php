@@ -15,7 +15,7 @@ class FClassCache {
 		if (!self::$classes) {
 			self::load();
 		}
-		if (!isset(self::$classes[$class]) || !file_exists(self::$classes[$class]['filename'])) {
+		if (!isset(self::$classes[$class]) || !is_array(self::$classes[$class]) || !file_exists(self::$classes[$class]['filename'])) {
 			self::reload();
 		}
 		if (isset(self::$classes[$class])) {

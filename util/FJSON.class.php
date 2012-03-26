@@ -36,12 +36,12 @@ class FJSON {
 	 */
 	public static function decode ($json, $assoc = false, $depth = 512, $options = null) {
 		if ($options !== null) {
-			//if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
-			//	$result = json_decode($json, $assoc, $depth, $options);
-			//} else {
+			if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
+				$result = json_decode($json, $assoc, $depth, $options);
+			} else {
 				trigger_error("json_decode does not support the options parameter until version 5.4.0.", E_USER_WARNING);
 				$result = json_decode($json, $assoc, $depth);
-			//}
+			}
 		} else {
 			$result = json_decode($json, $assoc, $depth);
 		}

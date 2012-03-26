@@ -90,14 +90,7 @@ class FNodeMessenger {
 		}
 		else if (!file_exists($cache) || filemtime($cache) < time()) {
 			touch($_ENV['config']['report.cache'], time() + 10);
-			$pid = pcntl_fork();
-			if ($pid == -1) {
-				// Skip unti the next run
-			} else if ($pid) {
-				pcntl_waitpid($pid, $status, WNOHANG | WUNTRACED);
-			} else {
-				self::refreshServerList();
-			}
+			self::refreshServerList();
 		}
 		else if (file_exists($cache)) {
 			include($cache);

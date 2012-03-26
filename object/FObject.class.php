@@ -21,7 +21,7 @@ abstract class FObject implements Serializable, FObjectInterface {
 		} else if (method_exists($this, $method)) {
 			return call_user_func_array(array($this, $method), $args);
 		}
-		new Exception('Call to undefined method ' . get_class($this) . '::' . $method . '()');
+		throw new Exception('Call to undefined method ' . get_class($this) . '::' . $method . '()');
 	}
 	public function __get ($key) {
 		return isset($this->data[$key]) ? $this->data[$key] : null;

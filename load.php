@@ -14,6 +14,11 @@ define('DS', DIRECTORY_SEPARATOR);
 setlocale(LC_ALL, array('en_US', 'en_US.UTF-8'));
 
 require(dirname(__FILE__) . '/functions.php');
+
+// Register class autoloader:
+require(dirname(__FILE__) . '/util/FClassCache.class.php');
+FClassCache::register();
+
 #ob_start('ob_framework_error_handler');
 #ob_start('ob_event_handler');
 #set_error_handler('framework_error_handler');
@@ -49,6 +54,11 @@ $_ENV['config']['cache.dir']               = SITEROOT . DS . 'cache';
  * Cached Class to File Mapping
  */
 $_ENV['config']['cache.class_list']        = '.private' . DS . 'class_list.php';
+/**
+ * Cached database view builds
+ */
+$_ENV['config']['cache.object_view_list']  = '.private' . DS . 'view_list.php';
+$_ENV['config']['class_filter.excluded']   = array('.svn' => true, 'tests' => true);
 /**
  * Automatically connect to database on page load
  */
@@ -108,6 +118,20 @@ $_ENV['config']['report.cache']            = array(&$_ENV['config']['cache.dir']
  */
 $_ENV['config']['report.my_cache']         = array(&$_ENV['config']['cache.dir'], '.private', 'my_node_servers.php');
 /**
+ * Use q* Tables: Only applies if using FObject and implementing
+ * FObjectDatabaseStorage
+ * Turns on/off the use of the q_* and the qp_* compliments to the view tables,
+ * v_* and vp_*. Using these tables increases performance, however it will also
+ * effectively double the size of the database. These are still experimental and
+ * may not always work. Use with caution.
+ */
+$_ENV['config']['fobject.qtables']         = false;
+/**
+ * FObjectSalesforceStorage driver configuration options
+ */
+$_ENV['config']['salesforce.dir']          = array($_ENV['config']['cache.dir'], 'salesforce');
+$_ENV['config']['salesforce.site']         = null;
+/**
  * Secret string used to gain access to certain diagnostic tools. If undefined 
  * in user-defined configuraiton, set to rand() to prevent unwarranted access.
  */
@@ -118,6 +142,10 @@ $_ENV['config']['session.db_pass']         = null;
 $_ENV['config']['session.db_name']         = null;
 $_ENV['config']['session.use_db']          = false;
 /**
+ * Calendar template directory.
+ */
+$_ENV['config']['templates.calendar.dir']  = array(&$_ENV['config']['library.dir'], 'framework', 'calendar', 'templates');
+/**
  * Base template. Used when nothing is defined for FTemplate::render()
  */
 $_ENV['config']['templates.base_template'] = 'templates/base.html.php';
@@ -127,22 +155,32 @@ $_ENV['config']['templates.base_template'] = 'templates/base.html.php';
 $_ENV['config']['templates.form.dir']      = array(&$_ENV['config']['library.dir'], 'framework', 'form', 'templates');
 $_ENV['config']['templates.form.field.dir'] = array(&$_ENV['config']['library.dir'], 'framework', 'form', 'field', 'templates');
 /**
- * Calendar template directory.
- */
-$_ENV['config']['templates.calendar.dir']  = array(&$_ENV['config']['library.dir'], 'framework', 'calendar', 'templates');
-/**
  * Filters to run before returning content in FTemplate::render(). They are 
  * run in the same order they are provided in the array.
  */
 $_ENV['config']['templates.filters']       = array('FWebrootFilter');
 /**
+ * Enables or disables sending reports at the end of script execution.
+ */
+$_ENV['config']['reports.enabled']         = true;
+/**
+ * Determines whether reporting should override any other error handling.
+ * When set to true, errors will not show in the browser unless they are fatal.
+ * False will allow reporting to occur silently.
+ */
+$_ENV['config']['reports.error_override']  = true;
+/**
  * Default date / time format settings. These can be overridden by webroot if 
  * necessary. Format matches the format defined in the PHP date() documentation.
  * @see http://php.net/manual/en/function.date.php
  */
-$_ENV['config']['format.date'] = 'M j, Y';
-$_ENV['config']['format.time'] = 'g:i a';
-$_ENV['config']['format.datetime'] = $_ENV['config']['format.date'] . ' ' . $_ENV['config']['format.time'];
+$_ENV['config']['format.date']             = 'M j, Y';
+$_ENV['config']['format.time']             = 'g:i a';
+$_ENV['config']['format.datetime']         = $_ENV['config']['format.date'] . ' ' . $_ENV['config']['format.time'];
+/**
+ * Various modes
+ */
+$_ENV['config']['mode.preview']            = false;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Merge in the configuration options specified in the webroot:
@@ -151,6 +189,7 @@ if (isset($config) && is_array($config)) {
 	foreach ($config as $key => $value) {
 		$_ENV['config'][$key] = $value;
 	}
+	unset($key, $value);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -181,9 +220,12 @@ if (!is_dir($_ENV['config']['cache.dir'] . DS . '.private')) {
 // Post-merge processing:
 ///////////////////////////////////////////////////////////////////////////////
 $_ENV['config']['cache.class_list']        = $_ENV['config']['cache.dir'] . DS . $_ENV['config']['cache.class_list'];
+$_ENV['config']['cache.object_view_list']  = $_ENV['config']['cache.dir'] . DS . $_ENV['config']['cache.object_view_list'];
 $_ENV['config']['firephp.class']           = FFileSystem::fileExists('FirePHPCore/FirePHP.class.php');
 
-
+///////////////////////////////////////////////////////////////////////////////
+// Instantiate global helpers:
+///////////////////////////////////////////////////////////////////////////////
 if ($_ENV['config']['database.auto_connect']) {
 	FDB::connect();
 }
@@ -211,6 +253,7 @@ $implode_keys = array(
 	'templates.calendar.dir',
 	'report.cache',
 	'report.my_cache',
+	'salesforce.dir',
 );
 foreach ($implode_keys as $key) {
 	if (is_array($_ENV['config'][$key])) {
@@ -222,9 +265,32 @@ unset($implode_keys, $key);
 ///////////////////////////////////////////////////////////////////////////////
 // Secret Call processing:
 ///////////////////////////////////////////////////////////////////////////////
-if (isset($_GET['UPDATE_DATABASE']) && $_GET['UPDATE_DATABASE'] == $_ENV['config']['secret']) {
-	sync_database();
+$secret_calls = filter_input_array(INPUT_GET, array(
+	'GET_SALESFORCE'          => FILTER_UNSAFE_RAW,
+	'UPDATE_DATABASE'         => FILTER_UNSAFE_RAW,
+	'UPDATE_FOBJECT_DATABASE' => FILTER_UNSAFE_RAW,
+	'CLEAR_CLASS_CACHE'       => FILTER_UNSAFE_RAW,
+	'UPDATE_SERVER_LIST'      => FILTER_UNSAFE_RAW,
+));
+switch ($_ENV['config']['secret']) {
+	case $secret_calls['GET_SALESFORCE']:
+		if (interface_exists('FObjectSalesforceStorage')) {
+			header('Content-Type: text/xml');
+			echo FObjectSalesforceStorageDriver::getSalesforceFilesXML();
+			exit;
+		}
+		break;
+	case $secret_calls['UPDATE_FOBJECT_DATABASE']:
+		FObjectQuery::updateStructure();
+		break;
+	case $secret_calls['UPDATE_DATABASE']:
+		sync_database();
+		break;
+	case $secret_calls['CLEAR_CLASS_CACHE']:
+		FClassCache::clear();
+		break;
+	case $secret_calls['UPDATE_SERVER_LIST']:
+		FNodeMessenger::refreshServerList();
+		break;
 }
-if (isset($_GET['UPDATE_SERVER_LIST']) && $_GET['UPDATE_SERVER_LIST'] == $_ENV['config']['secret']) {
-	FNodeMessenger::refreshServerList();
-}
+unset($secret_calls);

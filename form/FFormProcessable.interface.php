@@ -9,7 +9,7 @@
  * @date Wed Apr 20 15:00:00 EDT 2011
  * @version $Id$
  */
-interface FFormProcessable {}
+interface FFormProcessable extends FObjectInterface {}
 
 /*!
  * Form processable driver. This class's features are automatically pushed upon
@@ -36,6 +36,9 @@ class FFormProcessableDriver extends FObjectDriver {
 		$fields = array();
 		$form_model = $this->subject->getModel()->form();
 		foreach ($form_model as $name => $options) {
+			if (isset($options['ignore']) && $options['ignore'] == true) {
+				continue;
+			}
 			$type = 'FTextField';
 			if (array_key_exists('type', $options)) {
 				$type = $options['type'];
@@ -43,7 +46,7 @@ class FFormProcessableDriver extends FObjectDriver {
 			}
 			$field = FFormFieldFactory::make($type, $name);
 			$field->setAttributes($options);
-			$fields[] = $field;
+			$fields[$field->get('name')] = $field;
 		}
 		return $fields;
 	}

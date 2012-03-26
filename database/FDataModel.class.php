@@ -27,11 +27,6 @@ class FDataModel {
 	protected static $modelTables = array(); ///< Collection of FDataModelTable objects
 	protected static $tableQueries = array(); ///< Collection of queries to run after tables are created
 	/*!
-	 * Prevent object instantiation
-	 */
-	private function __construct () {
-	}
-	/*!
 	 * Adds a single table to the overall data model definition. The @c $model
 	 * parameter must be an array and define the fields for the data model 
 	 * as described above. The model is converted into an FDataModelTable 
@@ -64,6 +59,7 @@ class FDataModel {
 	 * @return @c null
 	 */
 	public static function setModel ($data_model) {
+		self::$modelTables = array();
 		foreach ($data_model as $table_name => $model) {
 			self::addTable($table_name, $model);
 		}
@@ -90,9 +86,9 @@ class FDataModel {
 	 * @return Array of queries in the form 'table' => "query".
 	 */
 	public static function getQueries () {
-		if (!is_array(self::$modelTables)) {
+		/*if (!is_array(self::$modelTables)) {
 			return array();
-		}
+		}*/
 		$creates = array();
 		$initializers = array();
 		foreach (self::$modelTables as $table_name => &$model) {
@@ -149,6 +145,16 @@ class FDataModel {
 	public static function bigintPK ($length = null) {
 		$field = self::intPK($length);
 		$field->type = 'BIGINT';
+		return $field;
+	}
+	/*!
+	 * @c TEXT field.
+	 *
+	 * @return FDataModelField Object with properties described above
+	 */
+	public static function blob () {
+		$field = new FDataModelField();
+		$field->type = 'BLOB';
 		return $field;
 	}
 	/*!
@@ -215,9 +221,8 @@ class FDataModel {
 	 */
 	public static function intFK ($length = null) {
 		$field = self::int($length);
-		$field->autoIncrement();
+		$field->noPrefix();
 		$field->notNull();
-		$field->primary();
 		$field->unsigned();
 		return $field;
 	}

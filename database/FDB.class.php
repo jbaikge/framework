@@ -22,11 +22,6 @@ class FDB {
 	private static $slave; ///< Slave database connection
 	private static $noSelectCheck; ///< Skip query check in FDB::slave();
 	/*!
-	 * Do not allow an instance of this class as it is a static class.
-	 */
-	private function __construct () {
-	}
-	/*!
 	 * Returns the number of rows affected by the last INSERT, UPDATE,
 	 * REPLACE, or DELETE query.
 	 *
@@ -124,7 +119,7 @@ class FDB {
 			if (!self::$master || mysqli_connect_errno()) {
 				throw new Exception("Could not connect to master database:" . NEWLINE . mysqli_connect_error());
 			}
-			self::$master = new FMySQLi(
+			self::$slave = new FMySQLi(
 				$config['database.slave_host'],
 				($config['database.slave_user']) ? $config['database.slave_user'] : $config['database.user'],
 				($config['database.slave_pass']) ? $config['database.slave_pass'] : $config['database.pass'],
@@ -215,15 +210,16 @@ class FDB {
 	public static function query ($sql) {
 		// KLUDGE: Cannot use func_get_args() as an argument to a 
 		// function call.
-		$args = array_slice(func_get_args(), 1);
-		if (count($args) && is_array($args[0])) {
-			$args = $args[0];
+		$args = func_get_args();
+		unset($args[0]); // Does not reset indexes
+		if (isset($args[1]) && is_array($args[1])) {
+			$args = $args[1];
 		}
-		if (FString::startsWith(ltrim($sql), 'SELECT')) {
-			self::$noSelectCheck = true;
-			return self::slave($sql, $args);
+		$sql = ltrim($sql);
+		if ($sql[0] == 'S' && $sql[1] == 'E' && $sql[2] == 'L') {
+			return self::runQuery('slave', $sql, $args);
 		} else {
-			return self::master($sql, $args);
+			return self::runQuery('master', $sql, $args);
 		}
 	}
 	/*!
@@ -240,8 +236,8 @@ class FDB {
 		}
 		self::$noSelectCheck = false;
 		$args = array_slice(func_get_args(), 1);
-		if (count($args) && is_array($args[0])) {
-			$args = $args[0];
+		if (isset($args[1]) && is_array($args[1])) {
+			$args = $args[1];
 		}
 		return self::runQuery('slave', $sql, $args);
 	}
@@ -255,12 +251,13 @@ class FDB {
 	 * @return Escaped SQL statement.
 	 */
 	public static function sql ($sql) {
-		$args = array_slice(func_get_args(), 1);
-		if (count($args) && is_array($args[0])) {
-			$args = $args[0];
+		$args = func_get_args();
+		unset($args[0]); // Does not reset indexes
+		if (isset($args[1]) && is_array($args[1])) {
+			$args = $args[1];
 		}
 		foreach ($args as &$arg) {
-			$arg = self::$slave->escape_string($arg);
+			$arg = ((string)(float)$arg == $arg) ? $arg : self::$slave->escape_string($arg);
 		}
 		return vsprintf($sql, $args);
 	}
@@ -278,11 +275,8 @@ class FDB {
 		if ($server == 'slave') {
 			$link =& self::$slave;
 		}
-		else if ($server == 'master') {
-			$link =& self::$master;
-		}
 		else {
-			throw new Exception("Invalid server name: `{$server}'");
+			$link =& self::$master;
 		}
 		if (!$link) {
 			throw new Exception("Cannot find link to database. Are you sure you ran `FDB::connect()'?");

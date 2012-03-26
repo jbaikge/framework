@@ -1,10 +1,15 @@
-<form method='<?php echo strtolower($form->get('method', 'post')); ?>' action='<?php echo $form->get('action', $_SERVER['REQUEST_URI']); ?>'>
+<form method='<?php echo strtolower($form->get('method', 'post')); ?>' action='<?php echo $form->get('action', $_SERVER['REQUEST_URI']); ?>' id="Form<?php echo get_class($form->getInnerInstance()); ?>">
 	<fieldset>
-		<legend></legend>
+		<legend><?php e($form->get('legend', '')); ?></legend>
+<?php
+if ($form->get('error', false) != false) {
+	echo "\t\t<p class=\"error\">" . htmlize($form->get('error')) . "</p>\n";
+}
+?>
 		<ol>
 <?php
 foreach($form->getFields() as $field) {
-	echo "<li>\n" . FTemplate::fetch($field->getTemplate(), array('field' => &$field, 'form' => &$form)) . "</li>\n";
+	echo "\t\t\t<li>" . FTemplate::fetch($field->getTemplate(), array('field' => &$field, 'form' => &$form)) . "</li>\n";
 }
 ?>
 		</ol>

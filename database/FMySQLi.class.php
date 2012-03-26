@@ -32,24 +32,10 @@ class FMySQLi extends mysqli {
 		if (!$this->real_query($query)) {
 			/// @todo Put an exception or some form of error 
 			/// handling here
-			throw new Exception($this->error, $this->errno);
+			throw new Exception($this->error . ' with query: ' . $query, $this->errno);
 		}
 		$result = new FMySQLiResult($this, $resultmode);
 		$result->query = $query;
 		return $result;
-	}
-	/*!
-	 * Prepares a query for execution. Uses the MySQL format for preparing 
-	 * queries as well as the MySQL engine for prepared queries. Prepared 
-	 * statements run once will encounter huge performance hits while 
-	 * statements run multiple times with different arguments will see 
-	 * performance increases.
-	 *
-	 * @param $query Query string in MySQL prepared statement format
-	 * @return A FMySQLiStatement object or False on failure
-	 * @see http://php.net/manual/en/function.mysqli-prepare.php
-	 */
-	public function prepare ($query) {
-		return new FMySQLiStatement($this, $query);
 	}
 }

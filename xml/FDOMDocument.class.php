@@ -29,6 +29,7 @@ class FDOMDocument {
 	 * @return String representation of Document in XML format
 	 */
 	public function asXML () {
+		$this->dom->formatOutput = true;
 		return $this->dom->saveXML();
 	}
 	/*!

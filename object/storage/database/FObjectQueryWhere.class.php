@@ -12,17 +12,16 @@ class FObjectQueryWhere {
 		'ne'      => array('!=', 1, null),
 		'regexp'  => array('REGEXP', 1, null),
 	);
-	private $preview = false;
+	private $preview;
 	private $type;
 	private $where_tail;
 	private $where_structure = array();
 	private $where_stack = array();
 
-	public function __construct ($type) {
+	public function __construct ($type, $preview = false) {
 		$this->type = $type;
 		$this->where_tail =& $this->where_structure;
-		$this->add($type . '.object_type', 'eq', array($type));
-		$this->add($type . '.object_deleted', 'eq', array(0));
+		$this->preview = $preview;
 	}
 
 	public function __call ($method, $args) {
@@ -31,17 +30,19 @@ class FObjectQueryWhere {
 
 	public function add ($field, $operator = 'eq', $args) {
 		if (in_array($field, array('and', 'or'))) {
-			$this->addGlue($field, $operator);
+			$this->addGlue($field);
 		} else {
 			$this->autoGlue();
-			if (!FString::startsWith($field, $this->type . '.')) {
-				$field .= '.attribute_value';
-			}
+			#if (!FString::startsWith($field, $this->type . '.')) {
+			#	$field .= '.attribute_value';
+			#}
 			$this->addClause($field, $operator, $args);
 		}
 	}
-
-	public function toString () {
+	public function hasClauses () {
+		return (bool)$this->where_structure;
+	}
+	public function __toString () {
 		return $this->compressClauses($this->where_structure);
 	}
 
@@ -55,12 +56,15 @@ class FObjectQueryWhere {
 
 	public function _endGroup () {
 		end($this->where_stack);
-		$this->where_tail =& $this->where_stack[key($this->where_stack)];		
+		$this->where_tail =& $this->where_stack[key($this->where_stack)];
 		array_pop($this->where_stack);
 	}
 
 	private function addClause ($field, $operator, $args) {
 		list($real_operator, $max_args, $arg_glue) = self::$operator_map[$operator];
+		if (isset($args[0]) && $args[0] instanceof Iterator) {
+			$args = array_flatten(iterator_to_array($args[0]));
+		}
 		if (count($args) > $max_args) {
 			throw new FObjectQueryMaxArgsException(count($args) . ' given, expecting ' . $max_args . ' for operator: ' . $real_operator);
 		}
@@ -70,18 +74,22 @@ class FObjectQueryWhere {
 		} else {
 			$escaped_values = array();
 			foreach ($args as $arg) {
-				$escaped_values[] = FDB::sql("'%s'", $arg);
+				$escaped_values[] = ((string)(float)$arg != $arg) ? FDB::sql("'%s'", $arg) : $arg;
 			}
 			$value = implode($arg_glue, $escaped_values);
 			if ($real_operator == 'IN') {
-				$value = '(' . $value . ')';
+				if ($value == '') {
+					$value = '(NULL)';
+				} else {
+					$value = '(' . $value . ')';
+				}
 			}
 			$clause = $clause_prefix .' ' . $value;
 		}
 		$this->where_tail[] = $clause;
 	}
 
-	private function addGlue ($type, $operator) {
+	private function addGlue ($type) {
 		$this->where_tail[] = strtoupper($type);
 	}
 
@@ -90,17 +98,6 @@ class FObjectQueryWhere {
 		if (!in_array($end, array('AND', 'OR', array()))) {
 			$this->where_tail[] = 'AND';
 		}
-	}
-
-	private function &last (&$array) {
-		if (!is_array($array)) {
-			return null;
-		}
-		if (!$array) {
-			return null;
-		}
-		end($array);
-		return $array[key($array)];
 	}
 
 	private function compressClauses (array $clauses, $depth = 1) {

@@ -10,6 +10,7 @@
  */
 
 class FString {
+	const DATE_MYSQL = 'Y-m-d H:i:s'; ///< MySQL-formatted date string
 	/*!
 	 * Determine a string's existence within another string. A blank needle 
 	 * will always cause this method to return true.

@@ -22,7 +22,11 @@ class FModelManager {
 	 * FField
 	 */
 	public function __construct($fields) {
-		$this->fields = $fields;
+		if ($fields instanceof FField) {
+			$this->fields = func_get_args();
+		} else {
+			$this->fields = $fields;
+		}
 	}
 	/*!
 	 * Fetches the field names of the field set inside this object.
@@ -124,5 +128,13 @@ class FModelManager {
 			$data[$field->getName()] = $field->getData($method);
 		}
 		return $data;
+	}
+	/*!
+	 * Appends a field to the current FModelManager instance.
+	 * 
+	 * @param $field An instance of FField
+	 */
+	public function append(FField $field) {
+		$this->fields[] = $field;
 	}
 }

@@ -145,11 +145,15 @@ class FFormField extends FFormUtils {
 	 */
 	public function getValue() {
 		if ($this->value === null) {
+			$flags = $this->get('flags', FILTER_FLAG_NONE);
 			$this->value = filter_var(
 				$this->getRawValue(),
 				$this->get('filter', FILTER_DEFAULT),
-				$this->get('flags', array())
+				$flags
 			);
+			if ($flags & FILTER_FORCE_ARRAY && isset($this->value[0]) && $this->value[0] === '') {
+				$this->value = array();
+			}
 		}
 		return $this->value;
 	}

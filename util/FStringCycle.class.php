@@ -39,8 +39,8 @@ class FStringCycle {
 	 */
 	public function __toString () {
 		return (++$this->index < $this->numStrings)
-			? $this->strings[$this->index]
-			: $this->strings[$this->index = 0];
+			? (string)$this->strings[$this->index]
+			: (string)$this->strings[$this->index = 0];
 	}
 	/*!
 	 * Resets the internal pointer for the cycle. Handy if using the 

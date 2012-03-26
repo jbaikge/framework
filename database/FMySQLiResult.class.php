@@ -27,17 +27,17 @@
  * @code
  * // Unassociative array of values:
  * foreach (FDB::query("SELECT id, name FROM table")->asRow() as $row) {
- * 	var_dump($row);
+ * 	echo $row[0], ': ', $row[1], "\n";
  * }
  *
  * // Associative array of column names => values
  * foreach (FDB::query("SELECT id, name FROM table")->asAssoc() as $row) {
- * 	var_dump($row);
+ * 	echo $row["id"], ': ', $row['name'], "\n";
  * }
  *
  * // Object representation of row (default)
  * foreach (FDB::query("SELECT id, name FROM table")->asObject() as $row) {
- * 	var_dump($row);
+ * 	echo $row->id, ': ', $row->name, "\n";
  * }
  * @endcode
  *
@@ -66,6 +66,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	private $currentRow; ///< Holds the current row in the Iterator
 	private $rowNum; ///< Incremented during iteration over the resultset
 	private $fetchFunc; ///< Function to use when returning results
+	private $fetchClassName; ///< Classname to use when using fetch_class
 	public $query; ///< SQL query represented by this result
 	/*!
 	 * Causes the Iterator to return an Associative Array for every row
@@ -74,6 +75,18 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	 */
 	public function &asAssoc () {
 		$this->fetchFunc = 'fetch_assoc';
+		return $this;
+	}
+	/*!
+	 * Causes the Iterator to return a class object specified by the 
+	 * @c $classname parameter, initialized with the data from the row. The row
+	 * data is always passed in as an associative array.
+	 * 
+	 * @return Reference back to result
+	 */
+	public function &asClass ($classname) {
+		$this->fetchFunc = 'fetch_class';
+		$this->fetchClassName = $classname;
 		return $this;
 	}
 	/*!
@@ -189,6 +202,33 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 		($this->fetchFunc === null) && $this->asObject();
 		$fetchFunc =& $this->fetchFunc;
 		return $this->$fetchFunc();
+	}
+	/*!
+	 * Custom implementation for fetch() to cast the result row as a class. The
+	 * class is determined in a few different ways:
+	 * 
+	 * If ->asClass("classname") is used, that class is ALWAYS used for the row.
+	 * 
+	 * If ->asClass(null) is used, and the column, _class, exists, the value in
+	 * _class is used.
+	 * 
+	 * If neither of the above exist, null is returned.
+	 * 
+	 * In the former two instances, data is sent to the constructor as an
+	 * associative array of the row's data.
+	 * 
+	 * @return Object of the type defined based on the description. null if no
+	 * class name is found.
+	 */
+	public function fetch_class () {
+		$classname = $this->fetchClassName;
+		$row = $this->fetch_assoc();
+		if ($classname == null && isset($row['_class'])) {
+			$classname = $row['_class'];
+		} else if ($classname == null) {
+			return null;
+		}
+		return new $classname($row);
 	}
 	/*!
 	 * Custom implementation of a result row fetcher to return values in a CSV

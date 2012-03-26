@@ -5,6 +5,7 @@ interface FObjectInterface {
 }
 
 abstract class FObject implements Serializable, FObjectInterface {
+	private $changes = array();
 	private $data = array();
 	private $observers = array('hooks' => array(), 'methods' => array());
 	private $observerInstances = array();
@@ -14,33 +15,40 @@ abstract class FObject implements Serializable, FObjectInterface {
 	public function __call($method, $args) {
 		$this->buildObservers();
 		if ($this->hasHooks($method)) {
-			try {
-				$retval = null;
-				$this->individualHook('pre', $method, $retval);
-				$this->individualHook('do', $method, $retval);
-				$this->individualHook('post', $method, $retval);
-				return $retval;
-			} catch (Exception $e) {
-				$this->individualHook('fail', $method, $e);
-			}
-			return null;
+			return $this->callHook($method);
 		} else if (array_key_exists($method, $this->observers['methods'])) {
 			return call_user_func_array(array($this->getObserverInstance($this->observers['methods'][$method]), $method), $args);
 		} else if (method_exists($this, $method)) {
 			return call_user_func_array(array($this, $method), $args);
 		}
-		trigger_error('Call to undefined method ' . get_class($this) . '::' . $method . '()', E_USER_ERROR);
+		new Exception('Call to undefined method ' . get_class($this) . '::' . $method . '()');
 	}
 	public function __get ($key) {
-		return array_key_exists($key, $this->data) ? $this->data[$key] : null;
+		return isset($this->data[$key]) ? $this->data[$key] : null;
 	}
 	public function __isset ($key) {
-		return isset($this->data[$key]);
+		return array_key_exists($key, $this->data);
 	}
 	public function __set ($key, $value) {
+		if (isset($this->data[$key], $this->changes[$key])) {
+			if ($this->changes[$key] == $value) {
+				unset($this->changes[$key]);
+			}
+		} else if (isset($this->data[$key]) && !isset($this->changes[$key])) {
+			if ($this->data[$key] != $value) {
+				$this->changes[$key] = $this->data[$key];
+			}
+		} else {
+			$this->changes[$key] = null;
+		}
 		return $this->data[$key] = $value;
 	}
 	public function __unset ($key) {
+		if (isset($this->data[$key]) && !isset($this->changes[$key])) {
+			$this->changes[$key] = $this->data[$key];
+		} else if (!isset($this->changes[$key])) {
+			$this->changes[$key] = null;
+		}
 		unset($this->data[$key]);
 	}
 	/*!
@@ -64,7 +72,7 @@ abstract class FObject implements Serializable, FObjectInterface {
 	 */
 	public final function attachObserver ($class_name) {
 		static $reflected_classes = array();
-		if (!class_exists($class_name)) {
+		if (!FClassCache::classExists($class_name)) {
 			return;
 		}
 		if (!array_key_exists($class_name, $reflected_classes)) {
@@ -75,7 +83,7 @@ abstract class FObject implements Serializable, FObjectInterface {
 			return;
 		}
 		foreach (get_class_methods($class_name) as $method) {
-			if (strpos($method, '__') === 0) {
+			if (FString::startsWith($method, '__')) {
 				continue;
 			}
 			$is_hook = false;
@@ -110,7 +118,7 @@ abstract class FObject implements Serializable, FObjectInterface {
 				$this->observers['hooks'][$name][$type][] = $class_name;
 			} else {
 				// If two drivers have the same method, the one at the end of
-				// the inheretence change will be the one chosen.
+				// the inheritance change will be the one chosen.
 				if (isset($this->observers['methods'][$method])) {
 					$original_class = $this->observers['methods'][$method];
 					if ($class_name instanceof $original_class) {
@@ -126,8 +134,12 @@ abstract class FObject implements Serializable, FObjectInterface {
 		if (is_object($data)) {
 			$data = get_object_vars($data);
 		}
+		// Instantiate from a view table
+		if (is_array($data) && isset($data['_cache'])) {
+			$data = $data['_cache'];
+		}
 		if (is_string($data)) {
-			$json = json_decode($data);
+			$json = json_decode($data, true);
 			if (json_last_error() == JSON_ERROR_NONE) {
 				$data = $json;
 			}
@@ -135,7 +147,8 @@ abstract class FObject implements Serializable, FObjectInterface {
 		if (is_array($data)) {
 			$this->data = $data;
 		} else if ($data) {
-			$this->populate($data);
+			$this->data['initialized_id'] = $data;
+			$this->data = $this->populate();
 		}
 	}
 	/*!
@@ -143,10 +156,31 @@ abstract class FObject implements Serializable, FObjectInterface {
 	 */
 	private final function buildObservers () {
 		if (!$this->observers['hooks'] && !$this->observers['methods']) {
-			foreach (class_implements($this) as $interface) {
-				$this->attachObserver($interface . 'Driver');
+			$cached_observers = FClassCache::getObservers($class = get_class($this));
+			if ($cached_observers !== false) {
+				$this->observers = $cached_observers;
+			} else {
+				foreach (class_implements($this) as $interface) {
+					$this->attachObserver($interface . 'Driver');
+				}
+				FClassCache::storeObservers($class, $this->observers);
 			}
 		}
+	}
+	public function callHook ($name) {
+		$retval = null;
+		try {
+			$this->individualHook('pre', $name, $retval);
+			$this->individualHook('do', $name, $retval);
+			$this->individualHook('post', $name, $retval);
+			return $retval;
+		} catch (Exception $e) {
+			$this->individualHook('fail', $name, $e);
+		}
+		return $retval;
+	}
+	public function getChanges () {
+		return $this->changes;
 	}
 	public function getData () {
 		return $this->data;
@@ -218,6 +252,9 @@ abstract class FObject implements Serializable, FObjectInterface {
 				break;
 			}
 		}		
+	}
+	public final function resetChanges () {
+		$this->changes = array();
 	}
 	public function serialize () {
 		return json_encode($this->data);

@@ -34,15 +34,6 @@
 class FTemplate {
 	private static $cachedTemplates; ///< Contents of last used template
 	/*!
-	 * Sets up this template
-	 *
-	 * @param $base_template_path The path to the base template used in 
-	 * FTemplate::render. The path provided must exist within the 
-	 * include_path
-	 */
-	private function __construct () {
-	}
-	/*!
 	 * Returns a processed template as a string. All variables in userland 
 	 * become availabe in the template as references to the real variables.
 	 * Modifications to variables in the template may be reflected in the 

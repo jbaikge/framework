@@ -21,7 +21,6 @@ class FField {
 	 */
 	public function __construct ($name) {
 		$this->name = $name;
-		return $this;
 	}
 	/*!
 	 * Handles arbitrary method calls. The arbitrary method calls serve a 
@@ -49,6 +48,7 @@ class FField {
 		if (FString::endsWith($method, '_options')) {
 			$this->context = substr($method, 0, strrpos($method, '_'));
 		} else {
+			!isset($args[0]) && trigger_error("Must provide exactly one argument to {$method}.", E_USER_ERROR);
 			$value = $args[0];
 			$this->data[$this->context][$method] = $value;
 		}

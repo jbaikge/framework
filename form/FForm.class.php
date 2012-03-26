@@ -51,6 +51,16 @@ abstract class FForm extends FFormUtils {
 		} else {
 			$this->data = filter_var_array($data, $this->getFilters());
 		}
+		// Add a condition for including file uploads.
+		if (isset($_FILES)) {
+			// Clear out empty uploads
+			foreach ($_FILES as $field => $file_data) {
+				if (empty($file_data['name'])) {
+					unset($_FILES[$field]);
+				}
+			}
+			$this->data = array_merge((array)$this->data, $_FILES);
+		}
 		$this->loadFields();
 		$this->_cacheValid(false);
 		return $this;
@@ -77,7 +87,7 @@ abstract class FForm extends FFormUtils {
 	 */
 	public function &populate(&$instance) {
 		if (!$this->valid()) {
-			throw FormException("Can't update an instance with an invalid form. Did you call " . get_class($this) . "::valid() first?");
+			throw new FormException("Can't update an instance with an invalid form. Did you call " . get_class($this) . "::valid() first?");
 		}
 		foreach ($this->cleanData as $key => $value) {
 			$instance->$key = $value;
@@ -167,3 +177,5 @@ abstract class FForm extends FFormUtils {
 		return $value;
 	}
 }
+
+class FormException extends Exception {}

@@ -198,6 +198,7 @@ class FDataModelField {
 	 */
 	public function &zeroFill () {
 		$this->zeroFill = true;
+		return $this;
 	}
 	/*!
 	 * Assembles all options for a field and produces the field definition.

@@ -21,15 +21,8 @@ class FFormInstance extends FForm {
 		$this->_cacheValid(false);
 		parent::__construct();
 	}
-	/*!
-	 * Returns the original FFormProcessable object with all incoming, valid, 
-	 * data applied.
-	 * 
-	 * @see FForm::populate()
-	 * @return Object with all 
-	 */
-	public function &populatedObject() {
-		return parent::populate($this->instance);
+	public function &getInnerInstance() {
+		return $this->instance;
 	}
 	/*!
 	 * Calls makeFields() on the internal FFormProcessable instance.
@@ -40,6 +33,16 @@ class FFormInstance extends FForm {
 	 */
 	public function makeFields() {
 		return $this->instance->makeFields();
+	}
+	/*!
+	 * Returns the original FFormProcessable object with all incoming, valid, 
+	 * data applied.
+	 * 
+	 * @see FForm::populate()
+	 * @return Object with all 
+	 */
+	public function &populatedObject() {
+		return parent::populate($this->instance);
 	}
 	public function rebuildFields () {
 		parent::rebuildFields();

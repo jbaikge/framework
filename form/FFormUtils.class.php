@@ -37,6 +37,9 @@ class FFormUtils {
 	public function getTemplate () {
 		return $this->get('template', $this->template);
 	}
+	public function set ($attribute, $value = null) {
+		$this->attributes[$attribute] = $value;
+	}
 	public function setAttributes (array $attributes) {
 		$this->attributes = array_merge($this->attributes, $attributes);
 	}

@@ -160,16 +160,6 @@ $_ENV['config']['templates.form.field.dir'] = array(&$_ENV['config']['library.di
  */
 $_ENV['config']['templates.filters']       = array('FWebrootFilter');
 /**
- * Enables or disables sending reports at the end of script execution.
- */
-$_ENV['config']['reports.enabled']         = true;
-/**
- * Determines whether reporting should override any other error handling.
- * When set to true, errors will not show in the browser unless they are fatal.
- * False will allow reporting to occur silently.
- */
-$_ENV['config']['reports.error_override']  = true;
-/**
  * Default date / time format settings. These can be overridden by webroot if 
  * necessary. Format matches the format defined in the PHP date() documentation.
  * @see http://php.net/manual/en/function.date.php

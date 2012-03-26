@@ -62,12 +62,38 @@
  * @version $Id$
  * @see http://php.net/manual/en/ref.mysqli.php
  */
-class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator {
+class FMySQLiResult implements Countable, SeekableIterator {
 	private $currentRow; ///< Holds the current row in the Iterator
 	private $rowNum; ///< Incremented during iteration over the resultset
 	private $fetchFunc; ///< Function to use when returning results
 	private $fetchClassName; ///< Classname to use when using fetch_class
+	private $result; ///< MySQLi Result held internally
+	private $passThru = true; ///< Whether to pass iterator requests to result
 	public $query; ///< SQL query represented by this result
+	public function __construct($result, $mode = MYSQLI_STORE_RESULT) {
+		$this->result = new mysqli_result($result, $mode);
+	}
+	/*!
+	 * Returns all rows. If the MySQL Native Driver is installed and the row
+	 * type is Assoc or Row, the native mysqli_result::fetch_all() method is
+	 * used. Otherwise, all the elements are returned via normal traversal.
+	 * 
+	 * @return Array of all rows, based on the type specified with the ->as*
+	 * method.
+	 */
+	public function all() {
+		if ($this->passThru && method_exists($this->result, 'fetch_all')) {
+			switch ($this->fetchFunc) {
+				case 'fetch_assoc':
+					return $this->result->fetch_all(MYSQLI_ASSOC);
+				case 'fetch_row':
+					return $this->result->fetch_all(MYSQLI_NUM);
+				default:
+					// fall down to manual generation
+			}
+		}
+		return iterator_to_array($this);
+	}
 	/*!
 	 * Causes the Iterator to return an Associative Array for every row
 	 *
@@ -75,6 +101,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	 */
 	public function &asAssoc () {
 		$this->fetchFunc = 'fetch_assoc';
+		$this->passThru = true;
 		return $this;
 	}
 	/*!
@@ -87,6 +114,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	public function &asClass ($classname) {
 		$this->fetchFunc = 'fetch_class';
 		$this->fetchClassName = $classname;
+		$this->passThru = false;
 		return $this;
 	}
 	/*!
@@ -97,6 +125,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	 */
 	public function &asCSV () {
 		$this->fetchFunc = 'fetch_csv';
+		$this->passThru = false;
 		return $this;
 	}
 	/*!
@@ -106,6 +135,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	 */
 	public function &asObject () {
 		$this->fetchFunc = 'fetch_object';
+		$this->passThru = true;
 		return $this;
 	}
 	/*!
@@ -115,6 +145,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	 */
 	public function &asRow () {
 		$this->fetchFunc = 'fetch_row';
+		$this->passThru = true;
 		return $this;
 	}
 	/*!
@@ -123,7 +154,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	 * @return Number of results in this resultset
 	 */
 	public function count () {
-		return $this->num_rows;
+		return $this->result->num_rows;
 	}
 	/*!
 	 * Returns the current row in the resultset Iterator. This method is 
@@ -165,8 +196,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	 * @see http://php.net/manual/en/function.rewind.php
 	 */
 	public function rewind () {
-		$this->data_seek($this->rowNum = 0);
-		$this->currentRow = $this->fetch();
+		$this->seek(0);
 	}
 	/*!
 	 * Checks to see if there is another result. This is the "check"
@@ -176,7 +206,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	 * @return False if there are no more results, true otherwise.
 	 */
 	public function valid () {
-		return $this->rowNum < $this->num_rows;
+		return $this->rowNum < $this->result->num_rows;
 	}
 	/*!
 	 * Seeks to a specified position.
@@ -184,7 +214,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	 * @param $index position to seek to.
 	 */
 	public function seek ($index) {
-		if ($this->data_seek($index)) {
+		if ($this->result->data_seek($index)) {
 			$this->rowNum = $index;
 			$this->currentRow = $this->fetch();
 		} else {
@@ -201,7 +231,11 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	public function fetch () {
 		($this->fetchFunc === null) && $this->asObject();
 		$fetchFunc =& $this->fetchFunc;
-		return $this->$fetchFunc();
+		if ($this->passThru) {
+			return $this->result->$fetchFunc();
+		} else {
+			return $this->$fetchFunc();
+		}
 	}
 	/*!
 	 * Custom implementation for fetch() to cast the result row as a class. The
@@ -222,7 +256,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	 */
 	public function fetch_class () {
 		$classname = $this->fetchClassName;
-		$row = $this->fetch_assoc();
+		$row = $this->result->fetch_assoc();
 		if ($classname == null && isset($row['_class'])) {
 			$classname = $row['_class'];
 		} else if ($classname == null) {
@@ -263,7 +297,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 		if (!$csvh) {
 			$csvh = fopen('php://memory', 'r+');
 		}
-		if ($row = $this->fetch_row()) {
+		if ($row = $this->result->fetch_row()) {
 			$csv_bytes = fputcsv($csvh, $row);
 			fseek($csvh, 0);
 			$row = fread($csvh, $csv_bytes);
@@ -293,9 +327,9 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	 * representation of first result row.
 	 */
 	public function first () {
-		$this->data_seek(0);
+		$this->result->data_seek(0);
 		$result = $this->fetch();
-		$this->data_seek($this->rowNum);
+		$this->result->data_seek($this->rowNum);
 		return $result;
 	}
 	/*!
@@ -317,7 +351,7 @@ class FMySQLiResult extends mysqli_result implements Countable, SeekableIterator
 	 * @return Result headers as described above.
 	 */
 	public function headers () {
-		$fields = $this->fetch_fields();
+		$fields = $this->result->fetch_fields();
 		$headers = array();
 		foreach ($fields as &$field) {
 			$headers[] = $field->name;

@@ -48,7 +48,9 @@ class FField {
 		if (FString::endsWith($method, '_options')) {
 			$this->context = substr($method, 0, strrpos($method, '_'));
 		} else {
-			!isset($args[0]) && trigger_error("Must provide exactly one argument to {$method}.", E_USER_ERROR);
+			if (!array_key_exists(0, $args)) {
+				throw new InvalidArgumentException("Must provide exactly one argument to {$method}.");
+			}
 			$value = $args[0];
 			$this->data[$this->context][$method] = $value;
 		}

@@ -71,8 +71,8 @@ class FDataModel {
 	 * each value an array of queries.
 	 * @return @c null
 	 */
-	public static function setTableQueries ($table_queries) {
-		if (!$table_queries) {
+	public static function setTableQueries (array $table_queries = null) {
+		if (empty($table_queries)) {
 			return;
 		}
 		foreach ($table_queries as $table => $queries) {

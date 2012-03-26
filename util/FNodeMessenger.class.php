@@ -30,7 +30,6 @@ class FNodeMessenger {
 		$filename = $_ENV['config']['report.cache'];
 		file_put_contents($filename, '<?php $servers = ' . var_export($servers, true) . ';');
 		touch($filename, $lowest_expiration);
-		exit;
 	}
 
 	public static function send (array $data) {
@@ -91,8 +90,14 @@ class FNodeMessenger {
 		}
 		else if (!file_exists($cache) || filemtime($cache) < time()) {
 			touch($_ENV['config']['report.cache'], time() + 10);
-			$command = 'curl "http://' . $_SERVER['SERVER_NAME'] . WEBROOT . '?UPDATE_SERVER_LIST=' . $_ENV['config']['secret'] . '"';
-			popen($command, 'r');
+			$pid = pcntl_fork();
+			if ($pid == -1) {
+				// Skip unti the next run
+			} else if ($pid) {
+				pcntl_waitpid($pid, $status, WNOHANG | WUNTRACED);
+			} else {
+				self::refreshServerList();
+			}
 		}
 		else if (file_exists($cache)) {
 			include($cache);

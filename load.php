@@ -232,7 +232,7 @@ if ($_ENV['config']['firephp.class'] != false) {
 	// Register to false out the exception throwing.
 	FirePHP::getInstance(true)->registerErrorHandler(false);
 }
-if ($_ENV['config']['reports.enabled']) {
+if ($_ENV['config']['report.enabled']) {
 	set_error_handler(array('FCallback', 'errorHandler'));
 	register_shutdown_function(array('FCallback', 'shutdown'));
 }

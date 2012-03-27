@@ -187,10 +187,10 @@ if (isset($config) && is_array($config)) {
 ///////////////////////////////////////////////////////////////////////////////
 
 foreach (array_merge(array($_ENV['config']['cache.dir']), $_ENV['config']['directories.writeable']) as $dir) {
-	if (!is_dir($dir)) {
-		throw new Exception('Directory [' . $dir . '] does not exist.');
+	if (!is_dir($dir) && !mkdir($dir)) {
+		throw new Exception('Directory [' . $dir . '] does not exist. Could not automatically create.');
 	}
-	if (!is_writeable($dir)) {
+	if (!is_writeable($dir) && !chmod($dir, 755)) {
 		throw new Exception('Directory [' . $dir . '] is not writeable.');
 	}
 }

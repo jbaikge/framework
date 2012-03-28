@@ -55,7 +55,7 @@ class FClassCache {
 			self::load();
 		}
 		// Pull cached interfaces from auto-loaded classes:
-		if (isset(self::$classes[$class])) {
+		if (isset(self::$classes[$class]) && self::$classes[$class]['interfaces'] !== false) {
 			$interfaces = self::$classes[$class]['interfaces'];
 		}
 		// Pull interfaces from inline-classes:

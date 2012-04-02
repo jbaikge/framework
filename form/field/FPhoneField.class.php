@@ -11,7 +11,7 @@
  * representing what to do with an extension in sprintf format. If an extension
  * is detected, the third index is used and juxtaposed to the value of the first
  * with no spaces.
- * The default value is: array('%d.', '%d.%d', ' x%d')
+ * The default value is: array('%03d.', '%03d.%04d', ' x%s')
  * 
  * @li @b error_invalid Error message to display when an invalid email address
  * is supplied. The string supports sprintf formatting where @c %s is replaced
@@ -35,7 +35,7 @@ class FPhoneField extends FFormField {
 		$value = parent::getValue();
 		$value = trim($value);
 
-		$bits = $this->get('format', array('%d.', '%d.%d', ' x%d'));
+		$bits = $this->get('format', array('%03d.', '%03d.%04d', ' x%s'));
 		if (!is_array($bits)) {
 			throw new InvalidArgumentException('Value for format must be an array');
 		} else if (count($bits) != 3) {

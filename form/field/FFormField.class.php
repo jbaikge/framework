@@ -165,6 +165,8 @@ class FFormField extends FFormUtils {
 	 */
 	public function &load($data) {
 		$this->raw = $data;
+		$this->value = null;
+		$this->error(false);
 		return $this;
 	}
 	/*!

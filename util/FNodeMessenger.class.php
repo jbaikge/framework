@@ -60,7 +60,8 @@ class FNodeMessenger {
 		$key = self::getKey();
 		$data = sha1($data, true) . $data;
 		$len = strlen($key);
-		for ($i = 0; $i < strlen($data); $i++) {
+		$data_len = strlen($data);
+		for ($i = 0; $i < $data_len; $i++) {
 			$data[$i] = $data[$i] ^ $key[$i % $len];
 		}
 		return $data;

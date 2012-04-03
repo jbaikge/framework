@@ -83,20 +83,17 @@ class FString {
 		}
 		// Safety check 
 		if ($format_override == '') $format_override = null;
-		if (!is_numeric($date) && !($date instanceof DateTime)) {
+		if ($date instanceof DateTime) {
+			$date = strtotime($date->format('Y-m-d H:i:s'));
+		} else if ((string)(int)$date != $date) {
 			$date = strtotime($date);
 		}
-		if (!($date instanceof DateTime)) {
-			$value = $date;
-			$date = new DateTime(null);
-			$date->setTimestamp($value);
-		}
-		if ($format_override === null && $date->format('His') == 0) {
-			return $date->format($_ENV['config']['format.date']);
+		if ($format_override === null && date('His', $date) == 0) {
+			return date($_ENV['config']['format.date'], $date);
 		} else if ($format_override === null) {
-			return $date->format($_ENV['config']['format.datetime']);
+			return date($_ENV['config']['format.datetime'], $date);
 		} else {
-			return $date->format($format_override);
+			return date($format_override, $date);
 		}
 	}
 }

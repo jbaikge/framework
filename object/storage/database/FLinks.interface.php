@@ -33,6 +33,16 @@ class FLinksDriver extends FObjectDriver {
 		self::unlinkIds($object->id, $this->subject->id);
 	}
 
+	public function linkWithID($id) {
+		self::linkIds($this->subject->id, $id);
+		self::linkIds($id, $this->subject->id);
+	}
+
+	public function unlinkWithID($id) {
+		self::unlinkIds($this->subject->id, $id);
+		self::unlinkIds($id, $this->subject->id);
+	}
+
 	public function selectLinks($type) {
 		$result = FDB::query("SELECT target_id FROM object_links WHERE origin_id = %d", $this->subject->id);
 		if (method_exists($result, 'fetch_all')) {

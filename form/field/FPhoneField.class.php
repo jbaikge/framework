@@ -65,7 +65,7 @@ class FPhoneField extends FFormField {
 		}
 		if ($value == '') {
 			$error_message = $this->get('error_invalid', 'Invalid phone number: %s');
-			$this->error($value = sprintf($error_message, $this->getRawValue()));
+			$this->error(sprintf($error_message, $this->getRawValue()));
 		}
 		return $value;
 	}

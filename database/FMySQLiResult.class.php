@@ -197,6 +197,7 @@ class FMySQLiResult implements Countable, SeekableIterator {
 	 */
 	public function rewind () {
 		$this->seek(0);
+		$this->currentRow = $this->fetch();
 	}
 	/*!
 	 * Checks to see if there is another result. This is the "check"
@@ -216,7 +217,6 @@ class FMySQLiResult implements Countable, SeekableIterator {
 	public function seek ($index) {
 		if ($this->result->data_seek($index)) {
 			$this->rowNum = $index;
-			$this->currentRow = $this->fetch();
 		} else if ($index > 0) {
 			throw new OutOfBoundsException('Index '.$index.' is invalid.');
 		}
@@ -259,7 +259,7 @@ class FMySQLiResult implements Countable, SeekableIterator {
 		$row = $this->result->fetch_assoc();
 		if ($classname == null && isset($row['_class'])) {
 			$classname = $row['_class'];
-		} else if ($classname == null) {
+		} else if ($classname == null || $row == null) {
 			return null;
 		}
 		return new $classname($row);

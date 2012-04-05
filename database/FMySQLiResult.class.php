@@ -165,7 +165,7 @@ class FMySQLiResult implements Countable, SeekableIterator {
 	 * @see http://php.net/manual/en/function.current.php
 	 */
 	public function current () {
-		return $this->currentRow = $this->fetch();
+		return $this->currentRow;
 	}
 	/*!
 	 * Returns the current row number of the resultset. This method is not
@@ -185,7 +185,7 @@ class FMySQLiResult implements Countable, SeekableIterator {
 	 * @see http://php.net/manual/en/function.next.php
 	 */
 	public function next () {
-		//$this->currentRow = $this->fetch();
+		$this->currentRow = $this->fetch();
 		++$this->rowNum;
 	}
 	/*!
@@ -216,6 +216,7 @@ class FMySQLiResult implements Countable, SeekableIterator {
 	public function seek ($index) {
 		if ($this->result->data_seek($index)) {
 			$this->rowNum = $index;
+			$this->currentRow = $this->fetch();
 		} else if ($index > 0) {
 			throw new OutOfBoundsException('Index '.$index.' is invalid.');
 		}

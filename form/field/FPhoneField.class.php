@@ -63,10 +63,15 @@ class FPhoneField extends FFormField {
 		} else {
 			$value = '';
 		}
-		if ($value == '') {
+		return $value;
+	}
+	public function validate() {
+		list($valid, $value) = parent::validate();
+		if ($valid && $value == '') {
+			$valid = false;
 			$error_message = $this->get('error_invalid', 'Invalid phone number: %s');
 			$this->error(sprintf($error_message, $this->getRawValue()));
 		}
-		return $value;
+		return array($valid, $value);
 	}
 }

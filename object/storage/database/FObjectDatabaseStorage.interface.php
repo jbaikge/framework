@@ -131,6 +131,33 @@ class FObjectDatabaseStorageDriver extends FObjectStorageDriver {
 		}
 		throw new FObjectDatabaseStorageException("There was a problem saving data.", 0, $exception);
 	}
+	/*!
+	 * @param $id ID of object to initialize
+	 * @param $use_id Use the ID to init the object instead of the cache
+	 * @return null if invalid ID or no object found, object of appropriate type
+	 * otherwise
+	 */
+	public static function fromID($id, $use_id = false) {
+		if ($id == 0 || $id == null) {
+			return null;
+		}
+		$result = FDB::query("SELECT object_type, cache
+			FROM objects
+				LEFT JOIN object_caches USING(object_id)
+			WHERE objects.object_id = %d",
+			$id
+		);
+		if (count($result) == 0) {
+			return null;
+		} else {
+			list($type, $cache) = $result->asRow()->fetch();
+			if ($use_id) {
+				return new $type($id);
+			} else {
+				return new $type($cache);
+			}
+		}
+	}
 
 	protected function archiveFields(array $field_list) {
 		$in_list = implode(', ', $this->quoteArray($field_list));

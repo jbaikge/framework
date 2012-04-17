@@ -133,11 +133,13 @@ class FObjectDatabaseStorageDriver extends FObjectStorageDriver {
 	}
 	/*!
 	 * @param $id ID of object to initialize
+	 * @param $valid_type Either: A single valid class name, or: An array of
+	 * valid class names
 	 * @param $use_id Use the ID to init the object instead of the cache
 	 * @return null if invalid ID or no object found, object of appropriate type
 	 * otherwise
 	 */
-	public static function fromID($id, $use_id = false) {
+	public static function fromID($id, $valid_type = null, $use_id = false) {
 		if ($id == 0 || $id == null) {
 			return null;
 		}
@@ -151,6 +153,9 @@ class FObjectDatabaseStorageDriver extends FObjectStorageDriver {
 			return null;
 		} else {
 			list($type, $cache) = $result->asRow()->fetch();
+			if (!empty($valid_types) && ($valid_type != $type || !in_array($type, $valid_type))) {
+				throw new InvalidArgumentException("Object for {$id} is not a valid type: " . var_export($valid_type, true));
+			}
 			if ($use_id) {
 				return new $type($id);
 			} else {

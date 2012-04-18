@@ -54,6 +54,7 @@
  * @version $Id$
  */
 class FFormField extends FFormUtils {
+	public $hidden = false; ///< Whether the field should be hidden from display
 	private $raw; ///< Raw value of field
 	private $value; ///< Sanitized value of field
 	/*!

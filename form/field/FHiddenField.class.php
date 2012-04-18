@@ -6,4 +6,6 @@
  * @date Wed Aug 24 15:36:58 EDT 2011
  * @version $Id$
  */
-class FHiddenField extends FFormField {}
+class FHiddenField extends FFormField {
+	public $hidden = true;
+}

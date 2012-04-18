@@ -9,10 +9,21 @@ if ($form->get('error', false) != false) {
 		<ol>
 <?php
 foreach($form->getFields() as $field) {
-	echo "\t\t\t<li>" . FTemplate::fetch($field->getTemplate(), array('field' => &$field, 'form' => &$form)) . "</li>\n";
+	if (!$field->hidden) {
+		echo "\t\t\t<li>" . FTemplate::fetch($field->getTemplate(), array('field' => &$field, 'form' => &$form)) . "</li>\n";
+	}
 }
 ?>
 		</ol>
+		<div class="hidden">
+<?php
+foreach ($form->getFields() as $field) {
+	if ($field->hidden) {
+		echo "\t\t\t" . FTemplate::fetch($field->getTemplate(), array('field' => &$field, 'form' => &$form)) . "\n";
+	}
+}
+?>
+		</div>
 		<div class="buttons">
 			<input type="Submit" value="Submit" class="FSubmitButton">
 		</div>

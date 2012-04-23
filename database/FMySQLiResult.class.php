@@ -168,6 +168,12 @@ class FMySQLiResult implements Countable, SeekableIterator {
 		return $this->currentRow;
 	}
 	/*!
+	 * Frees the memory associated with a result
+	 */
+	public function free() {
+		return $this->result->free();
+	}
+	/*!
 	 * Returns the current row number of the resultset. This method is not
 	 * called directly.
 	 *

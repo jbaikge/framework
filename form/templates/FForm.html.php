@@ -1,4 +1,4 @@
-<form method='<?php echo strtolower($form->get('method', 'post')); ?>' action='<?php echo $form->get('action', $_SERVER['REQUEST_URI']); ?>' id="Form<?php echo get_class($form->getInnerInstance()); ?>">
+<form method='<?php echo strtolower($form->get('method', 'post')); ?>' action='<?php echo $form->get('action', $_SERVER['REQUEST_URI']); ?>' id="Form<?php echo get_class($form->getInnerInstance()); ?>" enctype="<?php echo $form->get('enctype', 'multipart/form-data'); ?>">
 	<fieldset>
 		<legend><?php e($form->get('legend', '')); ?></legend>
 <?php

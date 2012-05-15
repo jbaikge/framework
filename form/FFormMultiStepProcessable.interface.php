@@ -61,11 +61,14 @@ class FFormMultiStepProcessableDriver extends FFormProcessableDriver {
 		$this->subject->_formstate = $base64;
 	}
 	public function setFormStep ($step) {
-		if ($step >= 0 && $step <= $this->subject->getMaxFormStep()) {
-			return $this->step = $step;
-		} else {
-			return false;
+		if ($step < 0 || $step > $this->subject->getMaxFormStep()) {
+			return $this->step = 0;
 		}
+		$has_state = array_key_exists('_formstate', $_REQUEST);
+		if ($step > 0 && !$has_state) {
+			return $this->step = 0;
+		}
+		return $this->step = $step;
 	}
 	/*!
 	 * Generates the Initialization Vector since we are using a blowfish cypher.

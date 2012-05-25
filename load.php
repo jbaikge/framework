@@ -260,6 +260,7 @@ $secret_calls = filter_input_array(INPUT_GET, array(
 	'UPDATE_DATABASE'         => FILTER_UNSAFE_RAW,
 	'UPDATE_FOBJECT_DATABASE' => FILTER_UNSAFE_RAW,
 	'CLEAR_CLASS_CACHE'       => FILTER_UNSAFE_RAW,
+	'CLEAR_VIEW_CACHE'        => FILTER_UNSAFE_RAW,
 	'UPDATE_SERVER_LIST'      => FILTER_UNSAFE_RAW,
 ));
 switch ($_ENV['config']['secret']) {
@@ -278,6 +279,10 @@ switch ($_ENV['config']['secret']) {
 		break;
 	case $secret_calls['CLEAR_CLASS_CACHE']:
 		FClassCache::clear();
+		FObjectViewBuilder::clearViewList();
+		break;
+	case $secret_calls['CLEAR_VIEW_CACHE']:
+		FObjectViewBuilder::clearViewList();
 		break;
 	case $secret_calls['UPDATE_SERVER_LIST']:
 		FNodeMessenger::refreshServerList();

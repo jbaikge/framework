@@ -21,6 +21,10 @@ class FObjectViewBuilder {
 			self::getInstance($type)->buildViews();
 		}
 	}
+	public static function clearViewList() {
+		self::$viewList = array();
+		@unlink($_ENV['config']['cache.object_view_list']);
+	}
 	public function getFieldList ($preview = false) {
 		$fields = array_merge(
 			array(

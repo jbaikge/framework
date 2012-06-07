@@ -137,4 +137,19 @@ class FModelManager {
 	public function append(FField $field) {
 		$this->fields[] = $field;
 	}
+	/*!
+	 * Removes a field by name.
+	 * 
+	 * @param $name Name of field to remove
+	 * @return Reference back to this model instance, for chaining.
+	 */
+	public function &remove($name) {
+		foreach ($this->fields as $i => $field) {
+			if ($field->getName() == $name) {
+				unset($this->fields[$i]);
+			}
+		}
+		$this->fields = array_values($this->fields);
+		return $this;
+	}
 }

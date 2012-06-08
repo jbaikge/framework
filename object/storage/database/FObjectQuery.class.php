@@ -1,7 +1,7 @@
 <?php
 class FObjectQuery {
-	public static function select ($type) {
-		return new FObjectQueryBuilder($type);
+	public static function select ($type, $preview = null) {
+		return new FObjectQueryBuilder($type, $preview);
 	}
 
 	public static function getStructure () {

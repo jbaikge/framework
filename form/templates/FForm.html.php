@@ -24,8 +24,6 @@ foreach ($form->getFields() as $field) {
 }
 ?>
 		</div>
-		<div class="buttons">
-			<input type="Submit" value="Submit" class="FSubmitButton">
-		</div>
+		<div class="buttons"><?php echo implode(' ', $form->getButtons()); ?></div>
 	</fieldset>
 </form>

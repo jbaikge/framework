@@ -8,6 +8,7 @@
  * @version $Id$
  */
 abstract class FForm extends FFormUtils {
+	protected $buttons = array();
 	protected $data = array(); ///< Unfiltered (raw) data
 	protected $cleanData = array(); ///< Filtered and validated data
 	/*!
@@ -24,6 +25,17 @@ abstract class FForm extends FFormUtils {
 		if (!$this->template) {
 			$this->template = $_ENV['config']['templates.form.dir'] . DS . __CLASS__ . '.html.php';
 		}
+		$this->buttons = array(
+			FFormButton::make('Submit')->class('FSubmitButton'),
+		);
+	}
+	/*!
+	 * Returns the array of buttons.
+	 * 
+	 * @return array of FFormButton objects
+	 */
+	public function getButtons() {
+		return $this->buttons;
 	}
 	/*!
 	 * Cached call to FForm::makeFields(). Use this instead of 
@@ -96,6 +108,21 @@ abstract class FForm extends FFormUtils {
 	}
 	public function rebuildFields () {
 		$this->_fieldCache(false);
+	}
+	/*!
+	 * Sets the button(s) for the form.
+	 * 
+	 * @param ... Buttons to use on the form. Takes an arbitrary number of
+	 * FFormButton
+	 */
+	public function setButtons() {
+		$buttons = array_flatten(func_get_args());
+		array_walk($buttons, function(&$b) {
+			if (!($b instanceof FFormButton)) {
+				throw new FormException('Button must be an instance of FFormButton. ' . get_class($b) . ' found.');
+			}
+		});
+		$this->buttons = $buttons;
 	}
 	/*!
 	 * @todo Document FForm::valid()

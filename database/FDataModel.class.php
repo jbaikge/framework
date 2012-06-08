@@ -189,7 +189,14 @@ class FDataModel {
 		$field->type = 'DATETIME';
 		return $field;
 	}
-	
+	/*!
+	 * @c DOUBLE field.
+	 * 
+	 * @param $length Optional. Length of double. (Default: 6)
+	 * @param $precision Optional. Number of digits after decimal. Note: 
+	 * Subtracts from length. (Default: 2)
+	 * @return FDataModelField Object with properties described above
+	 */
 	public static function double($length = 6, $precision = 2) {
 		$field = new FDataModelField();
 		$field->type = 'DOUBLE';
@@ -197,6 +204,18 @@ class FDataModel {
 		$field->length = $length;
 		return $field;
 		
+	}
+	/*!
+	 * @c ENUM field
+	 * 
+	 * @param ... List of values to use in the ENUM table.
+	 * @return FDataModelField Object with properties described above
+	 */
+	public static function enum() {
+		$field = new FDataModelField();
+		$field->type = 'ENUM';
+		$field->enumValues = array_flatten(func_get_args());
+		return $field;
 	}
 	/*!
 	 * @c INT field.

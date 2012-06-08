@@ -34,6 +34,7 @@ class FObjectViewBuilder {
 			),
 			$this->getObjectFieldNames(),
 			array(
+				'_preview',
 				'_added',
 				'_updated'
 			)
@@ -99,6 +100,7 @@ class FObjectViewBuilder {
 			}
 			$fields[] = $definition;
 		}
+		$fields[] = $this->type . '.object_preview';
 		$fields[] = $this->type . '.object_added';
 		switch (count($date_fields)) {
 			case 0:
@@ -120,6 +122,9 @@ class FObjectViewBuilder {
 			'  object_deleted = 0',
 			'  AND object_type = \'' . $this->type . '\'',
 		);
+		if (!$preview) {
+			$wheres[] = "  AND object_preview != 'ALL'";
+		}
 		$where = implode(PHP_EOL, $wheres);
 		return $where;
 	}

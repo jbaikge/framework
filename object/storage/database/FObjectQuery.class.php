@@ -38,7 +38,8 @@ class FObjectQuery {
 				'creator_id' => FDataModel::int()->unsigned()->foreignKey('objects', 'object_id', 'CASCADE', 'SET NULL'),
 				'type' => FDataModel::varchar(64)->notNull()->index(),
 				'added' => FDataModel::timestamp()->insertOnly(),
-				'deleted' => FDataModel::tinyint(1)->def(0)
+				'deleted' => FDataModel::tinyint(1)->def(0),
+				'preview' => FDataModel::enum('NONE', 'PARTIAL', 'ALL')->notNull(),
 			)
 		);
 	}

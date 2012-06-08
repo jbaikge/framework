@@ -90,8 +90,9 @@ class FObjectDatabaseStorageDriver extends FObjectStorageDriver {
 		if (isset($this->subject->id)) {
 			$this->new = false;
 		} else {
-			FDB::query("INSERT INTO objects SET object_type = '%s'",
-				get_class($this->subject)
+			FDB::query("INSERT INTO objects SET object_type = '%s', object_preview = '%s'",
+				get_class($this->subject),
+				$this->getPreviewMode() ? 'ALL' : 'NONE'
 			);
 			$this->subject->id = FDB::insertId();
 			$this->new = true;
@@ -119,6 +120,7 @@ class FObjectDatabaseStorageDriver extends FObjectStorageDriver {
 			$this->setCache($this->id);
 			$this->updateCacheTable(false);
 		}
+		$this->setObjectPreview();
 	}
 	public function postUpdate (&$data) {
 		FDB::query("COMMIT");
@@ -190,7 +192,8 @@ class FObjectDatabaseStorageDriver extends FObjectStorageDriver {
 				object_parent_id AS parent_id,
 				object_creator_id AS creator_id,
 				object_added AS _added,
-				'0000-00-00 00:00:00' AS _updated
+				'0000-00-00 00:00:00' AS _updated,
+				object_preview AS _preview
 			FROM objects
 			WHERE object_id = %d LIMIT 1
 			",
@@ -328,6 +331,27 @@ class FObjectDatabaseStorageDriver extends FObjectStorageDriver {
 				$this->id
 			);
 		}
+	}
+	protected function setObjectPreview() {
+		$changes = $this->subject->getChanges();
+		$preview_mode = $this->getPreviewMode();
+		switch (true) {
+			case $this->new && $preview_mode:
+			case !$this->new && $preview_mode && $this->subject->_preview == 'ALL':
+				$status = 'ALL';
+				break;
+			case !$this->new && $preview_mode && !empty($changes):
+				$status = 'PARTIAL';
+				break;
+			case !$preview_mode:
+				$status = 'NONE';
+				break;
+		}
+		$this->subject->_preview = $status;
+		FDB::query("UPDATE objects SET object_preview = '%s' WHERE object_id = %d",
+			$status,
+			$this->subject->id
+		);
 	}
 	protected function updateCacheTable ($preview) {
 		if (!$_ENV['config']['fobject.qtables']) {

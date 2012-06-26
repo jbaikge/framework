@@ -60,8 +60,9 @@ class FObjectDatabaseStorageDriver extends FObjectStorageDriver {
 				->fetch();
 		} else {
 			$cache = FDB::query(
-				"SELECT cache FROM object_caches WHERE object_id = %d",
-				$this->subject->initialized_id
+				"SELECT cache FROM objects LEFT JOIN object_caches USING(object_id) WHERE object_id = %d AND object_type = '%s'",
+				$this->subject->initialized_id,
+				get_class($this->subject)
 			)->asRow()->fetch();
 			$decoded = json_decode($cache[0], true);
 			if ($decoded != null && json_last_error() == JSON_ERROR_NONE) {
@@ -195,9 +196,12 @@ class FObjectDatabaseStorageDriver extends FObjectStorageDriver {
 				'0000-00-00 00:00:00' AS _updated,
 				object_preview AS _preview
 			FROM objects
-			WHERE object_id = %d LIMIT 1
+			WHERE object_id = %d
+				AND object_type = '%s'
+			LIMIT 1
 			",
-			$id
+			$id,
+			get_class($this->subject)
 		)->asAssoc()->fetch();
 		if (!is_array($data)) {
 			return null;

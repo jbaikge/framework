@@ -44,7 +44,7 @@ class FLinksDriver extends FObjectDriver {
 	}
 
 	public function selectLinks($type) {
-		$result = FDB::query("SELECT target_id FROM object_links WHERE origin_id = %d", $this->subject->id);
+		$result = FDB::query("SELECT target_id FROM object_links LEFT JOIN objects ON(target_id = object_id) WHERE origin_id = %d AND object_type = '%s'", $this->subject->id, $type);
 		if (method_exists($result, 'fetch_all')) {
 			$ids = $result->fetch_all();
 		} else {

@@ -83,6 +83,10 @@ $_ENV['config']['directories.private']     = array();
  */
 $_ENV['config']['directories.writeable']   = array();
 /**
+ * Whether to use FirePHP, if installed on system
+ */
+$_ENV['config']['firephp.enabled']         = true;
+/**
  * Content type of rendered HTML
  */
 $_ENV['config']['html.content_type']       = 'UTF-8';
@@ -227,7 +231,7 @@ if ($_ENV['config']['database.auto_connect'] && $_ENV['config']['session.use_db'
 	new FDBSessionHandler();
 }
 
-if ($_ENV['config']['firephp.class'] != false) {
+if ($_ENV['config']['firephp.enabled'] && $_ENV['config']['firephp.class'] != false) {
 	include($_ENV['config']['firephp.class']);
 	// Register to false out the exception throwing.
 	FirePHP::getInstance(true)->registerErrorHandler(false);

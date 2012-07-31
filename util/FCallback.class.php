@@ -30,7 +30,8 @@ class FCallback {
 			),
 			self::$errorMap[$errno]
 		));
-		if ($_ENV['config']['firephp.class'] != false) {
+		// sometimes you can trigger an error before config is set up. Not sure how though.
+		if (isset($_ENV['config']) && $_ENV['config']['firephp.enabled'] && $_ENV['config']['firephp.class'] != false) {
 			$previous = error_reporting(E_ALL | E_STRICT);
 			FirePHP::getInstance()->errorHandler($errno, $errstr, $errfile, $errline, $errcontext);
 			error_reporting($previous);

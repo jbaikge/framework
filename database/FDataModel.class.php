@@ -284,6 +284,16 @@ class FDataModel {
 		return $field;
 	}
 	/*!
+	 * @c TIME field.
+	 *
+	 * @return FDataModelField Object with properties described above
+	 */
+	public static function time() {
+		$field = new FDataModelField();
+		$field->type = 'TIME';
+		return $field;
+	}
+	/*!
 	 * @c TIMESTAMP field.
 	 *
 	 * Keep in mind: this field type is allowed to utilize the @c FDataModelField::insertOnly() and the @c 

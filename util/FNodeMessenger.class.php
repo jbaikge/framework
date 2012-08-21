@@ -16,7 +16,7 @@ class FNodeMessenger {
 		$json = curl_exec($ch);
 		$data = json_decode($json, true);
 		$servers = array();
-		$lowest_expiration = pow(2, 32) - 1;
+		$lowest_expiration = $upper_bound = pow(2, 32) - 1;
 		foreach ($data['servers'] as $server_info) {
 			$lowest_expiration = min($lowest_expiration, $server_info['expires']);
 			$servers[$server_info['name']] = array(
@@ -29,7 +29,10 @@ class FNodeMessenger {
 		}
 		$filename = $_ENV['config']['report.cache'];
 		file_put_contents($filename, '<?php $servers = ' . var_export($servers, true) . ';');
-		touch($filename, $lowest_expiration);
+		// Prevent issue where the node_server list was getting modified in 2106
+		if ($lowest_expiration < $upper_bound) {
+			touch($filename, $lowest_expiration);
+		}
 	}
 
 	public static function send (array $data) {
@@ -90,6 +93,9 @@ class FNodeMessenger {
 			require($cache_override);
 		}
 		else if (!file_exists($cache) || filemtime($cache) < time()) {
+			// Force a refresh of the cache. Sets the modify time 10s in the
+			// future to prevent clobbering and hitting the tracker more than
+			// once.
 			touch($_ENV['config']['report.cache'], time() + 10);
 			self::refreshServerList();
 		}

@@ -83,9 +83,17 @@ $_ENV['config']['directories.private']     = array();
  */
 $_ENV['config']['directories.writeable']   = array();
 /**
+ * Whether to encode the exception data into base64 on plaintext message
+ */
+$_ENV['config']['exception.encode']        = true;
+/**
+ * Email to send exception notices to
+ */
+$_ENV['config']['exception.notify']        = 'bugs@okco.com';
+/**
  * Whether to use FirePHP, if installed on system
  */
-$_ENV['config']['firephp.enabled']         = true;
+$_ENV['config']['firephp.enabled']         = false;
 /**
  * Content type of rendered HTML
  */
@@ -220,6 +228,8 @@ $_ENV['config']['firephp.class']           = FFileSystem::fileExists('FirePHPCor
 ///////////////////////////////////////////////////////////////////////////////
 // Instantiate global helpers:
 ///////////////////////////////////////////////////////////////////////////////
+set_exception_handler(array('FCallback', 'exceptionHandler'));
+
 if ($_ENV['config']['database.auto_connect']) {
 	FDB::connect();
 }

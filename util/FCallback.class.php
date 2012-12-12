@@ -41,6 +41,65 @@ class FCallback {
 		}
 		return true;
 	}
+	// @link http://php.net/manual/en/function.set-exception-handler.php#98201
+	public static function exceptionHandler($exception) {
+		// these are our templates
+		$traceline = "#%s %s(%s): %s(%s)";
+		$msg = "UNCAUGHT EXCEPTION\n\nException:    %s\n\nMessage:      %s\n\nCalling File: %s\n\nFile:         %s:%s\n\nStack trace:\n%s\n  thrown in %s on line %s";
+		//$msg = "PHP Fatal error:  Uncaught exception '%s' with message '%s' in %s:%s\nStack trace:\n%s\n  thrown in %s on line %s";
+
+		// alter your trace as you please, here
+		$trace = $exception->getTrace();
+		foreach ($trace as $key => $stackPoint) {
+			// I'm converting arguments to their type
+			// (prevents passwords from ever getting logged as anything other than 'string')
+			$trace[$key]['args'] = array_map('gettype', $trace[$key]['args']);
+		}
+
+		// build your tracelines
+		$result = array();
+		foreach ($trace as $key => $stackPoint) {
+			$result[] = sprintf(
+				$traceline,
+				$key,
+				$stackPoint['file'],
+				$stackPoint['line'],
+				$stackPoint['function'],
+				implode(', ', $stackPoint['args'])
+			);
+		}
+		// trace always ends with {main}
+		$result[] = '#' . ++$key . ' {main}';
+
+		// write tracelines into main template
+		$msg = sprintf(
+			$msg,
+			get_class($exception),
+			$exception->getMessage(),
+			$_SERVER['SCRIPT_FILENAME'],
+			$exception->getFile(),
+			$exception->getLine(),
+			implode("\n", $result),
+			$exception->getFile(),
+			$exception->getLine()
+		);
+
+		// Build email
+		$subject = 'PHP Exception in ' . $_SERVER['SCRIPT_FILENAME'];
+		mail($_ENV['config']['exception.notify'], $subject, $msg);
+
+		header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
+		header("Content-Type: text/plain");
+		echo "500 Internal Server Error. Please send the following to the website administrator:\n\n";
+		if ($_ENV['config']['exception.encode']) {
+			echo wordwrap(base64_encode($msg), 80, "\n", true);
+		} else {
+			echo $msg;
+		}
+		die();
+
+		return null;
+	}
 	public static function shutdown () {
 		if (!$_ENV['config']['report.enabled']) {
 			return;

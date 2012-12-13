@@ -43,59 +43,80 @@ class FCallback {
 	}
 	// @link http://php.net/manual/en/function.set-exception-handler.php#98201
 	public static function exceptionHandler($exception) {
+		global $argv;
 		// these are our templates
+		$types = array('email', 'screen');
 		$traceline = "#%s %s(%s): %s(%s)";
-		$msg = "UNCAUGHT EXCEPTION\n\nException:    %s\n\nMessage:      %s\n\nCalling File: %s\n\nFile:         %s:%s\n\nStack trace:\n%s\n  thrown in %s on line %s";
-		//$msg = "PHP Fatal error:  Uncaught exception '%s' with message '%s' in %s:%s\nStack trace:\n%s\n  thrown in %s on line %s";
+		$template = "UNCAUGHT EXCEPTION\n\n"
+			. "Exception:    %s\n\n"
+			. "Message:      %s\n\n"
+			. "Calling File: %s\n\n"
+			. "Calling URL:  %s\n\n"
+			. "File:         %s:%s\n\n"
+			. "Stack trace:\n"
+			. "%s\n"
+			. "  thrown in %s on line %s\n";
 
 		// alter your trace as you please, here
 		$trace = $exception->getTrace();
-		foreach ($trace as $key => $stackPoint) {
-			// I'm converting arguments to their type
-			// (prevents passwords from ever getting logged as anything other than 'string')
-			$trace[$key]['args'] = array_map('gettype', $trace[$key]['args']);
+		foreach ($trace as &$stack_point) {
+			// Convert arguments to their type (prevents passwords from ever
+			// getting logged as anything other than 'string')
+			$stack_point['email'] = array_map(function($v) { return var_export($v, true); }, $stack_point['args']);
+			$stack_point['screen'] = array_map('gettype', $stack_point['args']);
 		}
 
 		// build your tracelines
 		$result = array();
-		foreach ($trace as $key => $stackPoint) {
-			$result[] = sprintf(
-				$traceline,
-				$key,
-				$stackPoint['file'],
-				$stackPoint['line'],
-				$stackPoint['function'],
-				implode(', ', $stackPoint['args'])
-			);
+		foreach ($trace as $key => $stack_point) {
+			foreach ($types as $type) {
+				$result[$type][] = sprintf(
+					$traceline,
+					$key,
+					$stack_point['file'],
+					$stack_point['line'],
+					$stack_point['function'],
+					implode(', ', $stack_point[$type])
+				);
+			}
 		}
 		// trace always ends with {main}
-		$result[] = '#' . ++$key . ' {main}';
+		foreach ($types as $type) {
+			$result[$type][] = '#' . ++$key . ' {main}';
+		}
 
 		// write tracelines into main template
-		$msg = sprintf(
-			$msg,
-			get_class($exception),
-			$exception->getMessage(),
-			$_SERVER['SCRIPT_FILENAME'],
-			$exception->getFile(),
-			$exception->getLine(),
-			implode("\n", $result),
-			$exception->getFile(),
-			$exception->getLine()
-		);
+		$messages = array();
+		foreach ($types as $type) {
+			$messages[$type] = sprintf(
+				$template,
+				get_class($exception),
+				$exception->getMessage(),
+				$_SERVER['SCRIPT_FILENAME'],
+				isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : ("CLI: " . implode(' ', $argv)),
+				$exception->getFile(),
+				$exception->getLine(),
+				implode("\n", $result[$type]),
+				$exception->getFile(),
+				$exception->getLine()
+			);
+		}
 
 		// Build email
 		$subject = 'PHP Exception in ' . $_SERVER['SCRIPT_FILENAME'];
-		mail($_ENV['config']['exception.notify'], $subject, $msg);
+		mail($_ENV['config']['exception.notify'], $subject, $messages['email']);
 
-		header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
-		header("Content-Type: text/plain");
-		echo "500 Internal Server Error. Please send the following to the website administrator:\n\n";
-		if ($_ENV['config']['exception.encode']) {
-			echo wordwrap(base64_encode($msg), 80, "\n", true);
-		} else {
-			echo $msg;
+		if (isset($_SERVER['SERVER_PROTOCOL'])) {
+			header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
+			header("Content-Type: text/plain");
+			echo "500 Internal Server Error. Please send the following to the website administrator:\n\n";
 		}
+		if ($_ENV['config']['exception.encode']) {
+			echo wordwrap(base64_encode($messages['screen']), 80, "\n", true);
+		} else {
+			echo $messages['screen'];
+		}
+		trigger_error(sprintf("%s [%s]", get_class($exception), $exception->getMessage()), E_USER_ERROR);
 		die();
 
 		return null;

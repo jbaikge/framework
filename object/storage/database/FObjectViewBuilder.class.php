@@ -129,10 +129,10 @@ class FObjectViewBuilder {
 		return $where;
 	}
 	public function buildViews () {
-		$queries = array(
-			$this->getViewQuery(false),
-			$this->getViewQuery(true)
-		);
+		$queries = array($this->getViewQuery(false));
+		if ($_ENV['config']['database.preview_tables']) {
+			$queries[] = $this->getViewQuery(true);
+		}
 		if ($_ENV['config']['fobject.qtables']) {
 			$queries = array_merge(array(
 					$this->getDropQuery(false),

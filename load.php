@@ -75,6 +75,14 @@ $_ENV['config']['database.pass']           = null;
 $_ENV['config']['database.name']           = null;
 $_ENV['config']['database.definition']     = null;
 /**
+ * Enable the use of Preview Views - Part of FObjectQuery, creates a
+ * complimentary vp_<Type> view to go alongside the v_<Type> view.
+ * 
+ * Note there is a limit to the number of joins - set at 61. If there are more
+ * than 30 attributes in an FModel, this will fail.
+ */
+$_ENV['config']['database.preview_views'] = false;
+/**
  * Private directories that should not have access from a web browser
  */
 $_ENV['config']['directories.private']     = array();

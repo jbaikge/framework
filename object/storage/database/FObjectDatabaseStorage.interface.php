@@ -132,7 +132,6 @@ class FObjectDatabaseStorageDriver extends FObjectStorageDriver {
 		if ($this->new) {
 			unset($this->subject->id);
 		}
-		throw new FObjectDatabaseStorageException("There was a problem saving data.", 0, $exception);
 	}
 	/*!
 	 * @param $id ID of object to initialize

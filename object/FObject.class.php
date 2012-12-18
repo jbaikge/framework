@@ -176,6 +176,7 @@ abstract class FObject implements Serializable, FObjectInterface {
 			return $retval;
 		} catch (Exception $e) {
 			$this->individualHook('fail', $name, $e);
+			throw $e;
 		}
 		return $retval;
 	}

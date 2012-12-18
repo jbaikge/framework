@@ -91,9 +91,6 @@ class FObjectSalesforceStorageDriver extends FObjectDriver implements FObjectUpd
 		return false;
 	}
 	public function failUpdate($exception) {
-		if ($exception instanceof FObjectSalesforceException) {
-			trigger_error('Exception: ' . $exception->getMessage(), E_USER_ERROR);
-		}
 	}
 	private function getData() {
 		$data = $this->subject->getSalesforceData();

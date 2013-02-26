@@ -209,7 +209,7 @@ class FTemplateUtils {
 		$option_list = '';
 		foreach ($options as $key => $value) {
 			if (is_array($selected)) {
-				$selected_attribute = (array_key_exists($key, $selected)) ? ' selected="selected"' : '';				
+				$selected_attribute = (array_search($key, $selected) !== false) ? ' selected="selected"' : '';
 			} else {
 				$selected_attribute = ($key == (string)$selected) ? ' selected="selected"' : '';
 			}

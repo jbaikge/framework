@@ -10,7 +10,7 @@ if ($form->get('error', false) != false) {
 <?php
 foreach($form->getFields() as $field) {
 	if (!$field->hidden) {
-		echo "\t\t\t<li id=\"field-" . $field->getId() . ">" . FTemplate::fetch($field->getTemplate(), array('field' => &$field, 'form' => &$form)) . "</li>\n";
+		echo "\t\t\t<li id=\"field-" . $field->getId() . "\">" . FTemplate::fetch($field->getTemplate(), array('field' => &$field, 'form' => &$form)) . "</li>\n";
 	}
 }
 ?>

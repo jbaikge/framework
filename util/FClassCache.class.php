@@ -12,6 +12,11 @@ class FClassCache {
 	private static $classes;
 	private static $loaded = array();
 	public static function autoload ($class) {
+		// Instantly fail if looking for Swift_ classes - they have their own
+		// autoloader
+		if (substr($class, 0, 6) == 'Swift_') {
+			return false;
+		}
 		if (!self::$classes) {
 			self::load();
 		}
